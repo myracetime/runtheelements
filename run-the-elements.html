@@ -30,7 +30,7 @@ section{padding:5rem 2rem}
 .slabel{font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:.6rem;display:block}
 
 /* ── NAV ─────────────────────────────────────────────────────────── */
-nav{
+nav#main-nav{
   position:fixed;top:0;left:0;right:0;z-index:900;
   background:rgba(255,255,255,.97);backdrop-filter:blur(12px);
   border-bottom:1px solid var(--border);height:64px;
@@ -392,7 +392,7 @@ footer{background:var(--navy);padding:3rem 2rem 2rem}
     <img src="https://res.cloudinary.com/dbjahorp6/image/upload/v1779208351/FULL_LOGO_gxsvcv.png" alt="Run The Elements" style="height:44px;object-fit:contain">
     <button onclick="closeMenu()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text3)">&#x2715;</button>
   </div>
-  <nav class="mob-menu-links">
+  <div class="mob-menu-links">
     <a href="#quarters" onclick="closeMenu()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Quarters</a>
     <a href="#lookup"   onclick="closeMenu()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> My Status</a>
     <a href="#stats"    onclick="closeMenu()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Stats</a>
@@ -401,7 +401,7 @@ footer{background:var(--navy);padding:3rem 2rem 2rem}
     <a href="#guide"    onclick="closeMenu()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Upload Guide</a>
     <a href="#sponsors" onclick="closeMenu()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Partners</a>
     <a href="#contact"  onclick="closeMenu()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Contact</a>
-  </nav>
+  </div>
   <div class="mob-cta">
     <a href="https://myracetime.app/events" id="mob-reg">Register on MyRaceTime</a>
   </div>
