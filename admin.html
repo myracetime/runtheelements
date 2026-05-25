@@ -656,6 +656,8 @@ async function loadAll() {
       }
       // Merge rules
       if (s.mergeRules && window.MERGE_RULES) Object.assign(window.MERGE_RULES, s.mergeRules);
+      // Email aliases (person merges)
+      if (s.emailAliases) { window.EMAIL_ALIASES = s.emailAliases; console.log('RTE: Loaded', Object.keys(s.emailAliases).length, 'email aliases'); }
     }
 
     // 2. Load quarter CSV data
@@ -680,7 +682,11 @@ async function loadAll() {
       var pSnap = await getDoc(doc(fbDb, "rte_derived", "persons"));
       if (pSnap.exists() && pSnap.data().d) {
         var pp = JSON.parse(pSnap.data().d);
-        if (pp) Object.assign(window.PERSONS, pp);
+        if (pp) {
+      Object.assign(window.PERSONS, pp);
+      // Restore aliases array on each person
+      Object.values(window.PERSONS).forEach(function(p){ if(!p.aliases)p.aliases=[]; });
+    }
       }
     } catch(pe) { console.warn("RTE: Skip persons:", pe.message); }
 
@@ -728,6 +734,27 @@ window.fbSaveMergeRule = async function(from, into) {
     await setDoc(doc(fbDb, "rte_settings", "global"), u, {merge: true});
     return true;
   } catch(e) { console.error("RTE: Save merge rule failed:", e.message); return false; }
+};
+
+window.fbSaveMergePersons = async function(aliases, persons) {
+  if (!FB_READY || !fbDb) return false;
+  try {
+    // Save aliases
+    await setDoc(doc(fbDb, "rte_settings", "global"), {emailAliases: aliases}, {merge: true});
+    // Save updated persons (with merged quarters)
+    var slim = {};
+    Object.values(persons).forEach(function(p) {
+      var key = p.email || p.name;
+      slim[key] = {name: p.name, email: p.email, quarters: {}, aliases: p.aliases||[]};
+      Object.keys(p.quarters).forEach(function(q) {
+        var qd = p.quarters[q];
+        slim[key].quarters[q] = {bib:qd.bib,c:qd.c,d:qd.d,t:qd.t,ac:qd.ac,tier:qd.tier,o:qd.o,city:qd.city,g:qd.g,a:qd.a,pace:qd.pace};
+      });
+    });
+    await setDoc(doc(fbDb, "rte_derived", "persons"), {d: JSON.stringify(slim), count: Object.keys(slim).length, updatedAt: new Date().toISOString()});
+    console.log("RTE: Merge saved to Firebase");
+    return true;
+  } catch(e) { console.error("RTE: Save merge failed:", e.message); return false; }
 };
 
 window.fbSaveQuarterData = async function(qkey, data, persons) {
@@ -1054,7 +1081,9 @@ function doLookup(val){
   var matches=[];
   Object.values(PERSONS).forEach(function(p){
     var bib=false;Object.values(p.quarters).forEach(function(q){if((q.bib||"").toLowerCase().indexOf(v)>=0||(q.mrt||"").toLowerCase().indexOf(v)>=0)bib=true;});
-    if(p.name.toLowerCase().indexOf(v)>=0||bib)matches.push(p);
+    var aliasMatch=false;
+    if(p.aliases)(p.aliases).forEach(function(a){if(a.indexOf(v)>=0)aliasMatch=true;});
+    if(p.name.toLowerCase().indexOf(v)>=0||bib||aliasMatch||p.email.indexOf(v)>=0)matches.push(p);
   });
   if(!matches.length){if(dd)dd.style.display="none";return;}
   if(dd){
@@ -1068,6 +1097,8 @@ function doLookup(val){
 }
 function showPerson(email){
   if(el("lookup-dd"))el("lookup-dd").style.display="none";
+  // Resolve alias to primary email
+  if(window.EMAIL_ALIASES&&window.EMAIL_ALIASES[email])email=window.EMAIL_ALIASES[email];
   var p=PERSONS[email];if(!p){if(el("lookup-nf"))el("lookup-nf").style.display="block";return;}
   var qs=Object.keys(p.quarters),st=getLegendStatus(p);
   if(el("pc-av"))el("pc-av").textContent=cap(p.name).split(" ").map(function(w){return w[0]||"";}).join("").slice(0,2).toUpperCase();
@@ -1146,7 +1177,7 @@ function parseCSVRow(r){
     tier:(r.Tier||r.tier||"").trim(),
     country:(r.Country||r.country||"NIGERIA").trim().toUpperCase(),
     city:(r.City||r.city||"").trim().toUpperCase(),
-    phone:"",shirt:"",pay:parseInt((r.payment_amount||"0").toString().replace(/,/g,""))||0
+    phone:"",shirt:"",pay:(function(){var v=r["Payment Amount"]||r["payment_amount"]||r["PaymentAmount"]||r["Payment_Amount"]||"0";return parseInt(v.toString().replace(/,/g,""))||0;})()
   };
 }
 function uploadCSV(e,qkey){
@@ -1156,16 +1187,27 @@ function uploadCSV(e,qkey){
   if(statusEl){statusEl.textContent="Processing "+file.name+"...";statusEl.style.display="block";}
   Papa.parse(file,{header:true,skipEmptyLines:true,complete:function(res){
     var rows=res.data.map(parseCSVRow);
+    // Remove old quarter data from PERSONS before re-merging (handles re-uploads)
+    Object.keys(PERSONS).forEach(function(em){
+      if(PERSONS[em].quarters&&PERSONS[em].quarters[qkey]){
+        delete PERSONS[em].quarters[qkey];
+        // Clean up empty person records
+        if(!Object.keys(PERSONS[em].quarters).length)delete PERSONS[em];
+      }
+    });
     DB[qkey]=rows;
     rows.forEach(function(p){
       var em=p.email||(p.n.toLowerCase().replace(/\s+/g,"_")+"_noemail");
-      if(!PERSONS[em])PERSONS[em]={email:em,name:p.n,quarters:{}};
+      // Also check EMAIL_ALIASES for merged identities
+      if(window.EMAIL_ALIASES&&window.EMAIL_ALIASES[em])em=window.EMAIL_ALIASES[em];
+      if(!PERSONS[em])PERSONS[em]={email:em,name:p.n,quarters:{},aliases:[]};
       if(p.n.length>(PERSONS[em].name||"").length)PERSONS[em].name=p.n;
       PERSONS[em].quarters[qkey]={bib:p.bib,mrt:p.mrt,c:p.c,d:p.d,t:p.t,pace:p.pace,ac:p.ac,tier:p.tier,o:p.o,g:p.g,a:p.a,city:p.city,country:p.country,phone:p.phone,shirt:p.shirt,pay:p.pay};
     });
     loadQ(qkey);updateStats();
     if(typeof updateFinancials==="function")updateFinancials();
     if(typeof buildLegendTable==="function")buildLegendTable();
+    if(typeof buildDupeList==="function")buildDupeList();
     if(window.fbSaveQuarterData){
       if(statusEl)statusEl.textContent="Saving "+rows.length+" participants to Firebase\u2026";
       window.fbSaveQuarterData(qkey,rows,PERSONS).then(function(ok){
@@ -1238,7 +1280,8 @@ function admSearch(val){
   var matches=[];
   Object.values(PERSONS).forEach(function(p){
     var bib=false;Object.values(p.quarters).forEach(function(q){if((q.bib||"").toLowerCase().indexOf(v)>=0)bib=true;});
-    if(p.name.toLowerCase().indexOf(v)>=0||p.email.indexOf(v)>=0||bib)matches.push(p);
+    var aliasHit=false;if(p.aliases)(p.aliases).forEach(function(a){if(a.indexOf(v)>=0)aliasHit=true;});
+    if(p.name.toLowerCase().indexOf(v)>=0||p.email.indexOf(v)>=0||bib||aliasHit)matches.push(p);
   });
   if(!matches.length){if(res)res.innerHTML="<p style=\"font-size:.82rem;color:#718096;padding:.5rem\">No participant found.</p>";return;}
   var h="<div style=\"border:1px solid #e2e8f0;border-radius:8px;overflow:hidden\">";
@@ -1250,6 +1293,7 @@ function admSearch(val){
 function showAdmProfile(email){
   if(el("adm-results"))el("adm-results").innerHTML="";
   if(el("adm-search"))el("adm-search").value="";
+  if(window.EMAIL_ALIASES&&window.EMAIL_ALIASES[email])email=window.EMAIL_ALIASES[email];
   var p=PERSONS[email];if(!p)return;
   var qs=Object.keys(p.quarters),st=getLegendStatus(p);
   var h="<div style=\"display:flex;align-items:center;gap:1rem;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid #e2e8f0;flex-wrap:wrap\"><div style=\"width:44px;height:44px;border-radius:50%;background:#0d1f3c;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1rem;flex-shrink:0\">"+cap(p.name).split(" ").map(function(w){return w[0]||"";}).join("").slice(0,2)+"</div><div><div style=\"font-weight:700;color:#0d1f3c\">"+cap(p.name)+"</div><div style=\"font-size:.78rem;color:#718096\">"+p.email+"</div></div><span class=\"l-badge "+st.css+"\" style=\"margin-left:auto\">"+st.label+"</span></div>";
@@ -1266,13 +1310,148 @@ function showAdmProfile(email){
 
 function buildDupeList(){
   var e=el("dupe-list");if(!e)return;
-  if(!POTENTIAL_DUPES.length){e.innerHTML="<p style=\"font-size:.85rem;color:#718096\">No potential duplicates detected.</p>";return;}
-  e.innerHTML=POTENTIAL_DUPES.map(function(d){
-    return"<div style=\"background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:1rem;margin-bottom:.65rem\"><div style=\"font-size:.78rem;font-weight:700;color:#92400e;margin-bottom:.5rem\">Similarity: "+Math.round(d.similarity*100)+"% &middot; Ages: "+(d.p1_age||"?")+" / "+(d.p2_age||"?")+"</div><div style=\"display:grid;grid-template-columns:1fr 1fr;gap:.75rem\"><div style=\"background:#fff;border-radius:6px;padding:.75rem\"><strong>"+cap(d.p1_name)+"</strong><div style=\"font-size:.75rem;color:#718096\">"+d.p1_email+"</div><div style=\"font-size:.72rem;color:#94a3b8;margin-top:.25rem\">"+d.p1_quarters.map(function(q){return QC[q]?QC[q].name:q;}).join(", ")+"</div><button style=\"margin-top:.5rem;background:#0d1f3c;color:#fff;border:none;padding:.25rem .65rem;border-radius:4px;font-size:.72rem;cursor:pointer\" data-p=\""+d.p1_email+"\" class=\"dp-view\">View</button></div>"
-    +"<div style=\"background:#fff;border-radius:6px;padding:.75rem\"><strong>"+cap(d.p2_name)+"</strong><div style=\"font-size:.75rem;color:#718096\">"+d.p2_email+"</div><div style=\"font-size:.72rem;color:#94a3b8;margin-top:.25rem\">"+d.p2_quarters.map(function(q){return QC[q]?QC[q].name:q;}).join(", ")+"</div><button style=\"margin-top:.5rem;background:#0d1f3c;color:#fff;border:none;padding:.25rem .65rem;border-radius:4px;font-size:.72rem;cursor:pointer\" data-p=\""+d.p2_email+"\" class=\"dp-view\">View</button></div></div></div>";
+  // Detect runtime cross-quarter duplicates (same name, different email)
+  var nameMap={};
+  Object.values(PERSONS).forEach(function(p){
+    var nm=p.name.trim().toUpperCase();
+    if(!nameMap[nm])nameMap[nm]=[];
+    nameMap[nm].push(p);
+  });
+  var runtimeDupes=[];
+  Object.values(nameMap).forEach(function(group){
+    if(group.length<2)return;
+    for(var i=0;i<group.length;i++){
+      for(var j=i+1;j<group.length;j++){
+        runtimeDupes.push({
+          p1_name:group[i].name,p1_email:group[i].email,
+          p1_quarters:Object.keys(group[i].quarters),
+          p2_name:group[j].name,p2_email:group[j].email,
+          p2_quarters:Object.keys(group[j].quarters),
+          similarity:1.0,p1_age:"",p2_age:"",
+          source:"runtime"
+        });
+      }
+    }
+  });
+  // Combine with static POTENTIAL_DUPES, dedup
+  var seen={};
+  var allDupes=runtimeDupes.concat(POTENTIAL_DUPES).filter(function(d){
+    var key=[d.p1_email,d.p2_email].sort().join("|");
+    if(seen[key])return false;seen[key]=true;
+    // Skip already merged
+    if(window.EMAIL_ALIASES){
+      var a1=window.EMAIL_ALIASES[d.p1_email],a2=window.EMAIL_ALIASES[d.p2_email];
+      if(a1&&a2&&a1===a2)return false;
+      if(a1===d.p2_email||a2===d.p1_email)return false;
+    }
+    return true;
+  });
+  if(!allDupes.length){e.innerHTML="<p style=\"font-size:.85rem;color:#718096\">No potential duplicates detected.</p>";return;}
+  e.innerHTML=allDupes.map(function(d){
+    var isMerged=window.EMAIL_ALIASES&&(window.EMAIL_ALIASES[d.p1_email]||window.EMAIL_ALIASES[d.p2_email]);
+    var simPct=d.source==="runtime"?100:Math.round(d.similarity*100);
+    var qs1=(d.p1_quarters||[]).map(function(q){return QC[q]?QC[q].name:q;}).join(", ")||"No data";
+    var qs2=(d.p2_quarters||[]).map(function(q){return QC[q]?QC[q].name:q;}).join(", ")||"No data";
+    return"<div style=\"background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:1rem;margin-bottom:.65rem\">"+
+      "<div style=\"font-size:.78rem;font-weight:700;color:#92400e;margin-bottom:.5rem\">"+
+        "Similarity: "+simPct+"% &middot; "+
+        (d.source==="runtime"?"Same name across different emails":"Ages: "+(d.p1_age||"?")+" / "+(d.p2_age||"?"))+
+      "</div>"+
+      "<div style=\"display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem\">"+
+        "<div style=\"background:#fff;border-radius:6px;padding:.75rem\">"+
+          "<strong>"+cap(d.p1_name)+"</strong>"+
+          "<div style=\"font-size:.75rem;color:#718096;word-break:break-all\">"+d.p1_email+"</div>"+
+          "<div style=\"font-size:.72rem;color:#94a3b8;margin-top:.25rem\">Quarters: "+qs1+"</div>"+
+          "<button style=\"margin-top:.5rem;background:#0d1f3c;color:#fff;border:none;padding:.25rem .65rem;border-radius:4px;font-size:.72rem;cursor:pointer\" data-p=\""+d.p1_email+"\" class=\"dp-view\">View Profile</button>"+
+        "</div>"+
+        "<div style=\"background:#fff;border-radius:6px;padding:.75rem\">"+
+          "<strong>"+cap(d.p2_name)+"</strong>"+
+          "<div style=\"font-size:.75rem;color:#718096;word-break:break-all\">"+d.p2_email+"</div>"+
+          "<div style=\"font-size:.72rem;color:#94a3b8;margin-top:.25rem\">Quarters: "+qs2+"</div>"+
+          "<button style=\"margin-top:.5rem;background:#0d1f3c;color:#fff;border:none;padding:.25rem .65rem;border-radius:4px;font-size:.72rem;cursor:pointer\" data-p=\""+d.p2_email+"\" class=\"dp-view\">View Profile</button>"+
+        "</div>"+
+      "</div>"+
+      (isMerged
+        ? "<div style=\"background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:.5rem .75rem;font-size:.78rem;color:#166534;font-weight:600\">&#10003; Already merged</div>"
+        : "<div style=\"display:flex;align-items:center;gap:.65rem;flex-wrap:wrap\">"+
+            "<button style=\"background:#166534;color:#fff;border:none;padding:.45rem 1.1rem;border-radius:6px;font-size:.8rem;font-weight:700;cursor:pointer\" "+
+              "data-e1=\""+d.p1_email+"\" data-e2=\""+d.p2_email+"\" data-n=\""+d.p1_name+"\" class=\"dp-merge\">"+
+              "&#128279; Merge into one profile</button>"+
+            "<span style=\"font-size:.73rem;color:#94a3b8\">Both emails will resolve to the same person</span>"+
+          "</div>"
+      )+
+    "</div>";
   }).join("");
   e.querySelectorAll(".dp-view").forEach(function(btn){btn.addEventListener("click",function(){showAdmProfile(btn.dataset.p);});});
+  e.querySelectorAll(".dp-merge").forEach(function(btn){
+    btn.addEventListener("click",function(){mergePersons(btn.dataset.e1,btn.dataset.e2,btn.dataset.n,btn);});
+  });
 }
+
+// ── EMAIL ALIAS / PERSON MERGE SYSTEM ─────────────────────────────────────────
+// Maps secondary email → primary email
+window.EMAIL_ALIASES = window.EMAIL_ALIASES || {};
+
+function mergePersons(email1, email2, name, btn){
+  // email1 = primary (keep), email2 = secondary (alias)
+  // Merge all quarters from email2 into email1's record
+  var p1 = PERSONS[email1];
+  var p2 = PERSONS[email2];
+  if(!p1 && !p2){alert("Could not find both profiles to merge.");return;}
+
+  // If one doesn't exist, try alias lookup
+  if(!p1) p1 = PERSONS[window.EMAIL_ALIASES[email1]] || null;
+  if(!p2) p2 = PERSONS[window.EMAIL_ALIASES[email2]] || null;
+
+  // Decide which is primary: prefer the one with more quarters
+  var primary = p1, secondary = p2, primEmail = email1, secEmail = email2;
+  if(!primary || (p2 && Object.keys(p2.quarters).length > Object.keys(p1.quarters).length)){
+    primary = p2; secondary = p1; primEmail = email2; secEmail = email1;
+  }
+
+  if(!primary){alert("Profile not found.");return;}
+
+  // Merge secondary quarters into primary
+  if(secondary){
+    Object.keys(secondary.quarters).forEach(function(q){
+      if(!primary.quarters[q]){
+        primary.quarters[q] = secondary.quarters[q];
+      }
+    });
+    // Store aliases on the primary record
+    if(!primary.aliases) primary.aliases = [];
+    if(primary.aliases.indexOf(secEmail) < 0) primary.aliases.push(secEmail);
+    // Remove secondary record
+    delete PERSONS[secEmail];
+  }
+
+  // Register alias so searches for either email find the primary
+  window.EMAIL_ALIASES[secEmail] = primEmail;
+  window.EMAIL_ALIASES[email1]   = primEmail;
+  window.EMAIL_ALIASES[email2]   = primEmail;
+
+  // Save alias map to Firebase settings
+  if(window.fbSaveMergePersons) window.fbSaveMergePersons(window.EMAIL_ALIASES, PERSONS);
+
+  // Re-render everything
+  updateStats();
+  if(typeof updateFinancials==="function") updateFinancials();
+  if(typeof buildLegendTable==="function") buildLegendTable();
+  buildDupeList();
+
+  // Update the button to show merged
+  if(btn){
+    var row = btn.closest("div[style*='background:#fffbeb']");
+    if(row){
+      var mb = row.querySelector(".dp-merge");
+      if(mb) mb.parentElement.innerHTML = "<div style=\"background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:.5rem .75rem;font-size:.78rem;color:#166534;font-weight:600\">&#10003; Merged! Both emails now resolve to one profile.</div>";
+    }
+  }
+
+  alert("Merged! " + cap(primary.name) + " now has " + Object.keys(primary.quarters).length + " quarter(s). Both emails will resolve to the same profile.");
+}
+
+
 function buildClubDupeList(){
   var e=el("club-dupe-list");if(!e)return;
   function row(d){return"<div style=\"display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.6rem 0;border-bottom:1px solid #e2e8f0\"><span style=\"font-size:.83rem;font-weight:600;flex:1\">"+d.c1+"</span><span style=\"font-size:.72rem;color:#94a3b8\">vs</span><span style=\"font-size:.83rem;font-weight:600;flex:1\">"+d.c2+"</span><span style=\"font-size:.72rem;color:#94a3b8\">"+Math.round(d.sim*100)+"%</span><button style=\"background:#0d1f3c;color:#fff;border:none;padding:.25rem .65rem;border-radius:4px;font-size:.72rem;cursor:pointer\" class=\"mb-merge\" data-from=\""+d.c1+"\" data-into=\""+d.c2+"\">Merge → "+d.c2+"</button></div>";}
