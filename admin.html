@@ -530,6 +530,14 @@ body{background:#f0f4f8;min-height:100vh;padding-top:0}
     </div>
 
     <div class="adm-sec">
+      <h4>Shirt Size Summary</h4>
+      <p class="sub">Breakdown of shirt sizes ordered per quarter. Only participants with a Shirt Size entry in the CSV are counted. "Paid" means Complete Pack / Premium tier.</p>
+      <div id="shirt-summary">
+        <p style="font-size:.85rem;color:var(--text3)">Upload a CSV with a Shirt Size column to see the breakdown here.</p>
+      </div>
+    </div>
+
+    <div class="adm-sec">
       <h4>Elemental Legend Roster</h4>
       <p class="sub"><strong>Medal:</strong> All 4 quarters with Medal or Complete Pack tier. <strong>Digital:</strong> All 4 quarters, any tier. <strong>In Progress:</strong> Fewer than 4 quarters.</p>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.85rem">
@@ -695,6 +703,7 @@ async function loadAll() {
       if (window.updateStats)      window.updateStats();
       if (window.loadQ)            window.loadQ(window.activeQ || "air_2026");
       if (window.updateFinancials) window.updateFinancials();
+    if (window.updateShirtSummary) window.updateShirtSummary();
       if (window.buildLegendTable) window.buildLegendTable();
       if (window.buildDupeList)    window.buildDupeList();
       if (window.buildClubDupeList) window.buildClubDupeList();
@@ -795,7 +804,7 @@ window.fbSaveQuarterData = async function(qkey, data, persons) {
       data.forEach(function(p) {
         var key = p.email || p.n;
         qSlim[key] = { name: p.n, email: p.email, quarters: {} };
-        qSlim[key].quarters[qkey] = { bib: p.bib, c: p.c, d: p.d, t: p.t, ac: p.ac, tier: p.tier, o: p.o, city: p.city, g: p.g, a: p.a, pace: p.pace };
+        qSlim[key].quarters[qkey] = {bib:p.bib,c:p.c,d:p.d,t:p.t,ac:p.ac,tier:p.tier,o:p.o,city:p.city,g:p.g,a:p.a,pace:p.pace,shirt:p.shirt};
       });
       personsJson = JSON.stringify(qSlim);
     }
@@ -1177,7 +1186,7 @@ function parseCSVRow(r){
     tier:(r.Tier||r.tier||"").trim(),
     country:(r.Country||r.country||"NIGERIA").trim().toUpperCase(),
     city:(r.City||r.city||"").trim().toUpperCase(),
-    phone:"",shirt:"",pay:(function(){var v=r["Payment Amount"]||r["payment_amount"]||r["PaymentAmount"]||r["Payment_Amount"]||"0";return parseInt(v.toString().replace(/,/g,""))||0;})()
+    phone:"",shirt:(r["Shirt Size"]||r["shirt_size"]||r["ShirtSize"]||r["shirt"]||"").trim().toUpperCase(),pay:(function(){var v=r["Payment Amount"]||r["payment_amount"]||r["PaymentAmount"]||r["Payment_Amount"]||"0";return parseInt(v.toString().replace(/,/g,""))||0;})()
   };
 }
 function uploadCSV(e,qkey){
@@ -1205,7 +1214,7 @@ function uploadCSV(e,qkey){
       PERSONS[em].quarters[qkey]={bib:p.bib,mrt:p.mrt,c:p.c,d:p.d,t:p.t,pace:p.pace,ac:p.ac,tier:p.tier,o:p.o,g:p.g,a:p.a,city:p.city,country:p.country,phone:p.phone,shirt:p.shirt,pay:p.pay};
     });
     loadQ(qkey);updateStats();
-    if(typeof updateFinancials==="function")updateFinancials();
+    if(typeof updateFinancials==="function")updateFinancials();if(typeof updateShirtSummary==="function")updateShirtSummary();
     if(typeof buildLegendTable==="function")buildLegendTable();
     if(typeof buildDupeList==="function")buildDupeList();
     if(window.fbSaveQuarterData){
@@ -1300,7 +1309,7 @@ function showAdmProfile(email){
   qs.forEach(function(qkey){
     var q=p.quarters[qkey],qc=QC[qkey]||{color:"#94a3b8",label:qkey,icon:""};
     h+="<div style=\"background:#f8fafc;border:1px solid "+qc.color+"44;border-left:3px solid "+qc.color+";border-radius:7px;padding:1rem;margin-bottom:.65rem\"><div style=\"font-weight:700;font-size:.84rem;color:"+qc.color+";margin-bottom:.65rem\">"+qc.label+"</div><div style=\"display:grid;grid-template-columns:1fr 1fr;gap:.4rem .75rem;font-size:.8rem\">";
-    var fields=[["Bib",q.bib||"N/A"],["MRT ID",q.mrt||"N/A"],["Category",q.c||"N/A"],["Tier",q.tier||"N/A"],["Distance",q.d?q.d.toFixed(2)+" km":"Not recorded"],["Time",q.t?fmtH(q.t):"N/A"],["Avg Pace",q.pace||fmtPace(q.d,q.t)],["Activities",q.ac||0],["Club",q.o||"Individual"],["City",q.city?cap(q.city):"N/A"],["Gender",q.g||"N/A"],["Age",q.a||"N/A"],["Phone",q.phone||"N/A"],["Shirt",q.shirt||"N/A"],["Payment","₦"+(q.pay||0).toLocaleString()]];
+    var fields=[["Bib",q.bib||"N/A"],["MRT ID",q.mrt||"N/A"],["Category",q.c||"N/A"],["Tier",q.tier||"N/A"],["Distance",q.d?q.d.toFixed(2)+" km":"Not recorded"],["Time",q.t?fmtH(q.t):"N/A"],["Avg Pace",q.pace||fmtPace(q.d,q.t)],["Activities",q.ac||0],["Club",q.o||"Individual"],["City",q.city?cap(q.city):"N/A"],["Gender",q.g||"N/A"],["Age",q.a||"N/A"],["Phone",q.phone||"N/A"],["Shirt Size",q.shirt||"N/A"],["Payment","₦"+(q.pay||0).toLocaleString()]];
     fields.forEach(function(f){h+="<div><span style=\"color:#718096\">"+f[0]+":</span> <strong style=\"color:#0d1f3c\">"+f[1]+"</strong></div>";});
     h+="</div></div>";
   });
@@ -1482,6 +1491,90 @@ function updateFinancials(){
 }
 
 
+
+function updateShirtSummary(){
+  var wrap=el("shirt-summary");if(!wrap)return;
+  var SIZE_ORDER=["XS","S","M","L","XL","XXL","XXXL","4XL"];
+  var hasAny=false;
+  var html="";
+
+  Object.entries(DB).forEach(function(entry){
+    var qkey=entry[0],data=entry[1];
+    if(!data||!data.length)return;
+    var qc=QC[qkey]||{label:qkey,color:"#94a3b8"};
+
+    // Count shirts — only Complete Pack / Premium tier
+    var allShirts={},paidShirts={};
+    var totalPaid=0,totalAll=0;
+    data.forEach(function(p){
+      var sz=(p.shirt||"").trim().toUpperCase();
+      if(!sz||sz==="NS"||sz==="N/A")return; // skip no-size
+      totalAll++;
+      allShirts[sz]=(allShirts[sz]||0)+1;
+      var isPaid=(p.tier||"").trim();
+      if(isPaid==="Premium"||isPaid==="Complete Pack"||isPaid==="Complete"||isPaid==="medal"||isPaid==="Medal"){
+        totalPaid++;
+        paidShirts[sz]=(paidShirts[sz]||0)+1;
+      }
+    });
+    if(!totalAll)return;
+    hasAny=true;
+
+    // Sort sizes
+    var sortedSizes=Object.keys(allShirts).sort(function(a,b){
+      var ai=SIZE_ORDER.indexOf(a),bi=SIZE_ORDER.indexOf(b);
+      if(ai<0)ai=99;if(bi<0)bi=99;
+      return ai-bi;
+    });
+
+    html+="<div style=\"margin-bottom:1.75rem\">";
+    html+="<div style=\"display:flex;align-items:center;gap:.65rem;margin-bottom:.85rem\">";
+    html+="<div style=\"width:10px;height:10px;border-radius:50%;background:"+qc.color+"\"></div>";
+    html+="<span style=\"font-weight:700;font-size:.9rem;color:var(--navy)\">"+qc.label+"</span>";
+    html+="<span style=\"font-size:.78rem;color:var(--text3)\">"+totalAll+" shirt"+(totalAll!==1?"s":"")+" ordered &middot; "+totalPaid+" paid (Complete Pack)</span>";
+    html+="</div>";
+
+    // Size grid
+    html+="<div style=\"display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:.6rem;margin-bottom:.75rem\">";
+    sortedSizes.forEach(function(sz){
+      var total=allShirts[sz]||0;
+      var paid=paidShirts[sz]||0;
+      html+="<div style=\"background:#f8fafc;border:1.5px solid var(--border);border-radius:8px;padding:.75rem;text-align:center\">";
+      html+="<div style=\"font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--navy);letter-spacing:.05em\">"+sz+"</div>";
+      html+="<div style=\"font-size:1.15rem;font-weight:700;color:var(--navy)\">"+total+"</div>";
+      html+="<div style=\"font-size:.68rem;color:var(--text3);margin-top:.15rem\">"+paid+" paid</div>";
+      html+="</div>";
+    });
+    html+="</div>";
+
+    // Mini bar chart
+    if(totalAll>0){
+      html+="<div style=\"display:flex;gap:.3rem;align-items:flex-end;height:48px;padding:.25rem 0\">";
+      var maxVal=Math.max.apply(null,sortedSizes.map(function(s){return allShirts[s]||0;}));
+      sortedSizes.forEach(function(sz){
+        var val=allShirts[sz]||0;
+        var pct=maxVal>0?Math.round(val/maxVal*100):0;
+        html+="<div style=\"display:flex;flex-direction:column;align-items:center;flex:1;gap:.15rem\">";
+        html+="<div style=\"width:100%;background:"+qc.color+";border-radius:3px 3px 0 0;height:"+pct+"%\"></div>";
+        html+="</div>";
+      });
+      html+="</div>";
+      html+="<div style=\"display:flex;gap:.3rem\">";
+      sortedSizes.forEach(function(sz){
+        html+="<div style=\"flex:1;text-align:center;font-size:.62rem;color:var(--text3);font-weight:700\">"+sz+"</div>";
+      });
+      html+="</div>";
+    }
+    html+="</div>";
+  });
+
+  if(!hasAny){
+    wrap.innerHTML="<p style=\"font-size:.85rem;color:var(--text3)\">No shirt size data yet. Upload CSVs with a Shirt Size column to see the breakdown here.</p>";
+  } else {
+    wrap.innerHTML=html;
+  }
+}
+
 function saveRegUrl(){
   var u=(el("reg-url")||{value:""}).value.trim();
   if(!u){alert("Please enter a valid URL.");return;}
@@ -1555,7 +1648,7 @@ function adminLogin(){
     el("adm-gate").style.display="none";
     el("adm-main").style.display="block";
     el("adm-logout-btn").style.display="inline-block";
-    updateFinancials();buildLegendTable();buildDupeList();buildClubDupeList();
+    updateFinancials();if(typeof updateShirtSummary==="function")updateShirtSummary();buildLegendTable();buildDupeList();buildClubDupeList();
     // Populate flyer textarea with any currently loaded URLs
     var ta=el("flyer-url-input");
     if(ta&&window.flyerURLs&&window.flyerURLs.length){ta.value=window.flyerURLs.join("\n");}
