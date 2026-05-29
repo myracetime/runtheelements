@@ -4,9 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Admin &mdash; Run The Elements 2026</title>
+<!-- PRIVACY: this dashboard exposes participant emails, phones & payments.
+     It must never be indexed or cached by search engines. -->
+<meta name="robots" content="noindex,nofollow,noarchive,noimageindex,nosnippet">
+<meta name="googlebot" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0d1f3c">
 <link rel="icon" type="image/png" href="https://res.cloudinary.com/dbjahorp6/image/upload/v1779208351/COLOR_bmzexh.png">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"><</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
 :root{
   --navy:#0d1f3c;--gold:#e8931a;--gold-l:rgba(232,147,26,.08);
@@ -475,6 +484,28 @@ body{background:#f0f4f8;min-height:100vh;padding-top:0}
   </div>
   <div class="adm-box">
 
+    <!-- ════════ GRAND TOTALS — EVERYTHING AT A GLANCE ════════ -->
+    <div class="adm-sec" id="gt-sec" style="background:linear-gradient(160deg,#0d1f3c,#15294a);border:none">
+      <h4 style="color:#fff">&#128202; Grand Totals &mdash; Everything at a Glance</h4>
+      <p class="sub" style="color:rgba(255,255,255,.7)">Live sums across every quarter currently loaded. Updates automatically whenever data is uploaded or synced from the cloud.</p>
+      <div id="gt-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.85rem;margin-top:1.1rem"></div>
+      <div style="overflow-x:auto;margin-top:1.5rem">
+        <table class="ft" id="gt-table" style="color:#fff">
+          <thead><tr style="border-bottom:1px solid rgba(255,255,255,.18)">
+            <th style="color:rgba(255,255,255,.85)">Quarter</th>
+            <th style="color:rgba(255,255,255,.85)">Participants</th>
+            <th style="color:rgba(255,255,255,.85)">Distance (km)</th>
+            <th style="color:rgba(255,255,255,.85)">Hours</th>
+            <th style="color:rgba(255,255,255,.85)">Activities</th>
+            <th style="color:rgba(255,255,255,.85)">Avg Dist</th>
+            <th style="color:rgba(255,255,255,.85)">Revenue</th>
+          </tr></thead>
+          <tbody id="gt-body"></tbody>
+          <tfoot id="gt-foot" style="border-top:2px solid var(--gold)"></tfoot>
+        </table>
+      </div>
+    </div>
+
     <div class="adm-sec">
       <h4>Registration Link</h4>
       <p class="sub">Updates all &ldquo;Register&rdquo; buttons site-wide. Saved to cloud &mdash; applies everywhere.</p>
@@ -703,6 +734,7 @@ async function loadAll() {
       if (window.updateStats)      window.updateStats();
       if (window.loadQ)            window.loadQ(window.activeQ || "air_2026");
       if (window.updateFinancials) window.updateFinancials();
+      if (window.updateGrandTotals) window.updateGrandTotals();
     if (window.updateShirtSummary) window.updateShirtSummary();
       if (window.buildLegendTable) window.buildLegendTable();
       if (window.buildDupeList)    window.buildDupeList();
@@ -1214,7 +1246,7 @@ function uploadCSV(e,qkey){
       PERSONS[em].quarters[qkey]={bib:p.bib,mrt:p.mrt,c:p.c,d:p.d,t:p.t,pace:p.pace,ac:p.ac,tier:p.tier,o:p.o,g:p.g,a:p.a,city:p.city,country:p.country,phone:p.phone,shirt:p.shirt,pay:p.pay};
     });
     loadQ(qkey);updateStats();
-    if(typeof updateFinancials==="function")updateFinancials();if(typeof updateShirtSummary==="function")updateShirtSummary();
+    if(typeof updateFinancials==="function")updateFinancials();if(typeof updateGrandTotals==="function")updateGrandTotals();if(typeof updateShirtSummary==="function")updateShirtSummary();
     if(typeof buildLegendTable==="function")buildLegendTable();
     if(typeof buildDupeList==="function")buildDupeList();
     if(window.fbSaveQuarterData){
@@ -1478,6 +1510,85 @@ function addMerge(){
 }
 
 
+// ════════ GRAND TOTALS — sum of ALL data across every quarter ════════
+function updateGrandTotals(){
+  if(!el("gt-cards"))return;
+  var TARGET={"75KM":75,"125KM":125,"250KM":250,"375KM":375,"500KM":500,"750KM":750,"800KM":800,"1000KM":1000,"1500KM":1500};
+  var grand={part:0,dist:0,time:0,acts:0,rev:0,done:0};
+  var orgs={},cities={},perQ=[];
+
+  Object.keys(DB).forEach(function(qkey){
+    var data=DB[qkey];
+    if(!data||!data.length)return;
+    var q={key:qkey,label:(QC[qkey]?QC[qkey].label:qkey),color:(QC[qkey]?QC[qkey].color:"#94a3b8"),part:data.length,dist:0,time:0,acts:0,rev:0};
+    data.forEach(function(d){
+      q.dist+=d.d||0; q.time+=d.t||0; q.acts+=d.ac||0;
+      var pay=typeof d.pay==="number"?d.pay:parseInt(String(d.pay||"0").replace(/,/g,""))||0;
+      q.rev+=pay;
+      if(d.o)orgs[normOrg(d.o)]=1;
+      if(d.city)cities[d.city.trim().toUpperCase()]=1;
+      if((d.d||0)>=(TARGET[d.c]||75))grand.done++;
+    });
+    grand.part+=q.part; grand.dist+=q.dist; grand.time+=q.time; grand.acts+=q.acts; grand.rev+=q.rev;
+    perQ.push(q);
+  });
+
+  // People-level metrics (de-duplicated across quarters)
+  var people=Object.values(PERSONS);
+  var unique=people.length;
+  var legendEligible=people.filter(function(p){return Object.keys(p.quarters).length>=2;}).length;
+  var fullLegends=people.filter(function(p){return ALL_QUARTERS.every(function(q){return !!p.quarters[q];});}).length;
+  var avgDist=grand.part?grand.dist/grand.part:0;
+  var completion=grand.part?Math.round(grand.done/grand.part*100):0;
+
+  // ── Cards ──
+  function card(num,label,sub){
+    return"<div style=\"background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:1rem 1.1rem\">"
+      +"<div style=\"font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:#fff;line-height:1.05\">"+num+"</div>"
+      +"<div style=\"font-size:.68rem;color:rgba(255,255,255,.65);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-top:.3rem\">"+label+"</div>"
+      +(sub?"<div style=\"font-size:.66rem;color:var(--gold);margin-top:.15rem\">"+sub+"</div>":"")+"</div>";
+  }
+  el("gt-cards").innerHTML=[
+    card(grand.part.toLocaleString(),"Total Participations","across all quarters"),
+    card(unique.toLocaleString(),"Unique People","de-duplicated"),
+    card(Math.round(grand.dist).toLocaleString()+" km","Total Distance"),
+    card(Math.round(grand.time/60).toLocaleString()+" hrs","Total Time on Move"),
+    card(grand.acts.toLocaleString(),"Activities Logged"),
+    card(Object.keys(orgs).length.toLocaleString(),"Clubs & Orgs"),
+    card(Object.keys(cities).length.toLocaleString(),"Cities"),
+    card("\u20A6"+grand.rev.toLocaleString(),"Gross Revenue"),
+    card(legendEligible.toLocaleString(),"Legend Eligible","2+ quarters"),
+    card(fullLegends.toLocaleString(),"Elemental Legends","all 4 quarters"),
+    card(avgDist.toFixed(1)+" km","Avg Distance / Person"),
+    card(completion+"%","Target Completion","met category goal")
+  ].join("");
+
+  // ── Per-quarter breakdown + TOTAL row ──
+  if(el("gt-body")){
+    el("gt-body").innerHTML=perQ.map(function(q){
+      return"<tr style=\"border-bottom:1px solid rgba(255,255,255,.08)\">"
+        +"<td style=\"font-weight:700;color:"+q.color+"\">"+q.label+"</td>"
+        +"<td>"+q.part.toLocaleString()+"</td>"
+        +"<td>"+Math.round(q.dist).toLocaleString()+"</td>"
+        +"<td>"+Math.round(q.time/60).toLocaleString()+"</td>"
+        +"<td>"+q.acts.toLocaleString()+"</td>"
+        +"<td>"+(q.part?(q.dist/q.part).toFixed(1):"0")+" km</td>"
+        +"<td style=\"color:var(--gold);font-weight:700\">\u20A6"+q.rev.toLocaleString()+"</td></tr>";
+    }).join("")||"<tr><td colspan=\"7\" style=\"color:rgba(255,255,255,.6);padding:1rem\">No quarter data loaded yet.</td></tr>";
+  }
+  if(el("gt-foot")){
+    el("gt-foot").innerHTML=perQ.length?("<tr style=\"font-weight:800\">"
+      +"<td style=\"color:#fff\">TOTAL</td>"
+      +"<td style=\"color:#fff\">"+grand.part.toLocaleString()+"</td>"
+      +"<td style=\"color:#fff\">"+Math.round(grand.dist).toLocaleString()+"</td>"
+      +"<td style=\"color:#fff\">"+Math.round(grand.time/60).toLocaleString()+"</td>"
+      +"<td style=\"color:#fff\">"+grand.acts.toLocaleString()+"</td>"
+      +"<td style=\"color:#fff\">"+avgDist.toFixed(1)+" km</td>"
+      +"<td style=\"color:var(--gold)\">\u20A6"+grand.rev.toLocaleString()+"</td></tr>"):"";
+  }
+}
+
+
 function updateFinancials(){
   var rows=[],gt=0,gc=0;
   Object.entries(DB).forEach(function(entry){
@@ -1648,7 +1759,7 @@ function adminLogin(){
     el("adm-gate").style.display="none";
     el("adm-main").style.display="block";
     el("adm-logout-btn").style.display="inline-block";
-    updateFinancials();if(typeof updateShirtSummary==="function")updateShirtSummary();buildLegendTable();buildDupeList();buildClubDupeList();
+    updateFinancials();if(typeof updateGrandTotals==="function")updateGrandTotals();if(typeof updateShirtSummary==="function")updateShirtSummary();buildLegendTable();buildDupeList();buildClubDupeList();
     // Populate flyer textarea with any currently loaded URLs
     var ta=el("flyer-url-input");
     if(ta&&window.flyerURLs&&window.flyerURLs.length){ta.value=window.flyerURLs.join("\n");}

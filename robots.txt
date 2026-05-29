@@ -1,0 +1,9 @@
+# robots.txt for Run The Elements — https://www.runtheelements.com
+User-agent: *
+Allow: /
+
+# Admin dashboard contains private participant data — never index it
+Disallow: /admin
+Disallow: /admin.html
+
+Sitemap: https://www.runtheelements.com/sitemap.xml
