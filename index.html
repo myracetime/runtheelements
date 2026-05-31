@@ -435,6 +435,7 @@ footer{background:var(--navy);padding:3rem 2rem 2rem}
     <a href="#tiers"    onclick="closeMenu()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg> Join</a>
     <a href="#how"      onclick="closeMenu()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> How It Works</a>
     <a href="#guide"    onclick="closeMenu()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Upload Guide</a>
+    <a href="#health-sync" onclick="closeMenu()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Health Sync</a>
     <a href="#sponsors" onclick="closeMenu()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Partners</a>
     <a href="#contact"  onclick="closeMenu()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Contact</a>
   </div>
@@ -454,6 +455,7 @@ footer{background:var(--navy);padding:3rem 2rem 2rem}
     <li><a href="#stats">Stats</a></li>
     <li><a href="#tiers">Join</a></li>
     <li><a href="#how">How It Works</a></li>
+    <li><a href="#health-sync">Health Sync</a></li>
     <li><a href="#sponsors">Partners</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
@@ -816,6 +818,75 @@ footer{background:var(--navy);padding:3rem 2rem 2rem}
     </div>
   </div>
 </section>
+
+<!-- HEALTH SYNC GUIDE (added section) -->
+<style>
+#health-sync .hcg-tabs{display:flex;gap:.4rem;flex-wrap:wrap;border-bottom:2px solid var(--border);margin:1.5rem 0 2rem}
+#health-sync .hcg-tab{display:flex;align-items:center;gap:.5rem;background:transparent;border:none;border-bottom:3px solid transparent;color:var(--text2);padding:.65rem 1.1rem;font-size:.83rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;margin-bottom:-2px;border-radius:6px 6px 0 0;white-space:nowrap}
+#health-sync .hcg-tab:hover{color:var(--navy);background:rgba(13,31,60,.04)}
+#health-sync .hcg-tab.active{color:var(--water);border-bottom-color:var(--water);background:rgba(21,101,192,.06)}
+#health-sync .hcg-panel{display:none;animation:gfade .3s ease}
+#health-sync .hcg-panel.active{display:block}
+#health-sync .hcg-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:1.75rem;box-shadow:var(--shadow);max-width:720px}
+</style>
+<section id="health-sync" style="background:#fff;padding:5rem 2rem">
+  <div class="container">
+    <span class="slabel">Alternative Sync Method</span>
+    <h2 class="stitle">Sync Strava via Your Health App</h2>
+    <p class="ssub">Can&rsquo;t connect Strava directly, or prefer not to? You can route your Strava activities through your phone&rsquo;s health app &mdash; <strong>Apple Health</strong> on iPhone or <strong>Health Connect</strong> on Android &mdash; and MyRaceTime will pull them in automatically.</p>
+
+    <div class="hcg-tabs">
+      <button class="hcg-tab active" onclick="hcgSwitch(this,'hcg-ios')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04z"/></svg> iPhone &middot; Apple Health</button>
+      <button class="hcg-tab" onclick="hcgSwitch(this,'hcg-android')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 16V9a7 7 0 0 1 14 0v7"/><path d="M2 16h20"/><path d="M8 21h8"/></svg> Android &middot; Health Connect</button>
+    </div>
+
+    <!-- TAB: iOS -->
+    <div id="hcg-ios" class="hcg-panel active">
+      <div class="hcg-card">
+        <h3 class="guide-panel-title">Connect Strava to <span style="color:var(--water)">Apple Health</span></h3>
+        <ol class="guide-steps-list">
+          <li class="guide-step-item"><span class="step-num">1</span><div>Open the <strong>Strava app</strong>, tap the <strong>You</strong> tab, then the <strong>gear icon</strong> (Settings).</div></li>
+          <li class="guide-step-item"><span class="step-num">2</span><div>Tap <strong>&ldquo;Manage Apps and Devices&rdquo;</strong> (older versions: <em>Applications, Services, and Devices</em>).</div></li>
+          <li class="guide-step-item"><span class="step-num">3</span><div>Tap <strong>Health</strong>, then the <strong>+</strong> icon, then <strong>Connect</strong>.</div></li>
+          <li class="guide-step-item"><span class="step-num">4</span><div>On the Health Access screen, tap <strong>&ldquo;Turn On All&rdquo;</strong>. <strong>Workouts must be enabled</strong> or nothing will sync.</div></li>
+          <li class="guide-step-item"><span class="step-num">5</span><div>Tap <strong>Allow</strong> in the top-right corner.</div></li>
+          <li class="guide-step-item"><span class="step-num">6</span><div>Back in Strava&rsquo;s Health settings, toggle <strong>&ldquo;Automatic Uploads&rdquo; ON</strong> so future activities sync on their own.</div></li>
+          <li class="guide-step-item"><span class="step-num">7</span><div>Open <strong>MyRaceTime</strong>, go to your event, choose <strong>Apple Health</strong> under &ldquo;Connect Apps&rdquo;, and grant permission.</div></li>
+          <li class="guide-step-item"><span class="step-num">8</span><div>Activities now flow <strong>Strava &rarr; Apple Health &rarr; MyRaceTime</strong> &mdash; no direct Strava connection needed. <strong style="color:#2e7d32">&#10003;</strong></div></li>
+        </ol>
+        <div style="margin-top:1.25rem;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:1rem 1.1rem;font-size:.83rem;color:var(--text2);line-height:1.65"><strong style="color:var(--water)">Note:</strong> Activities recorded on third-party devices (Garmin, Zwift, etc.) may sync without their map/GPS route. Activities recorded with Strava or an Apple Watch carry full data.</div>
+      </div>
+    </div>
+
+    <!-- TAB: Android -->
+    <div id="hcg-android" class="hcg-panel">
+      <div class="hcg-card">
+        <h3 class="guide-panel-title">Connect Strava to <span style="color:var(--water)">Health Connect</span></h3>
+        <ol class="guide-steps-list">
+          <li class="guide-step-item"><span class="step-num">1</span><div>Install the <strong>Health Connect</strong> app from the Play Store (built in on Android 14+) and sign in with your Google account.</div></li>
+          <li class="guide-step-item"><span class="step-num">2</span><div>Open <strong>Strava</strong>, tap the <strong>You</strong> tab, then the <strong>gear icon</strong> &rarr; <strong>Manage Apps and Devices</strong> &rarr; <strong>Health Connect</strong>.</div></li>
+          <li class="guide-step-item"><span class="step-num">3</span><div>Follow the prompts to <strong>connect</strong> your Health Connect account.</div></li>
+          <li class="guide-step-item"><span class="step-num">4</span><div>Open the <strong>Health Connect</strong> app &rarr; <strong>App Permissions</strong> &rarr; <strong>Strava</strong> &rarr; tap <strong>&ldquo;Allow all&rdquo;</strong>.</div></li>
+          <li class="guide-step-item"><span class="step-num">5</span><div>Open <strong>MyRaceTime</strong>, go to your event, choose <strong>Health Connect</strong> (or <strong>Google Fit</strong>) under &ldquo;Connect Apps&rdquo;, and grant permission.</div></li>
+          <li class="guide-step-item"><span class="step-num">6</span><div>Activities now flow <strong>Strava &rarr; Health Connect &rarr; MyRaceTime</strong> automatically. <strong style="color:#2e7d32">&#10003;</strong></div></li>
+        </ol>
+        <div style="margin-top:1.25rem;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:1rem 1.1rem;font-size:.83rem;color:var(--text2);line-height:1.65"><strong style="color:var(--water)">Note:</strong> Only <strong>GPS-based</strong> activities sync through Health Connect (time, distance, calories); manually-added entries won&rsquo;t carry over. If you still use Google Fit, switch to Health Connect &mdash; Google is retiring the Google Fit connection.</div>
+      </div>
+    </div>
+
+    <!-- caution -->
+    <div style="margin-top:2rem;max-width:720px;background:#fff8e8;border:1px solid rgba(232,147,26,.3);border-radius:8px;padding:1rem 1.1rem;font-size:.83rem;color:var(--text2);line-height:1.65"><strong style="color:var(--gold)">&#9888; Important:</strong> Only sync activities from <strong>ONE</strong> source. Connecting Strava directly <em>and</em> through your health app can create duplicate activities, which may get your account flagged.</div>
+  </div>
+</section>
+<script>
+function hcgSwitch(btn,id){
+  var sec=document.getElementById("health-sync");if(!sec)return;
+  sec.querySelectorAll(".hcg-tab").forEach(function(b){b.classList.remove("active");});
+  sec.querySelectorAll(".hcg-panel").forEach(function(p){p.classList.remove("active");});
+  btn.classList.add("active");
+  var p=document.getElementById(id);if(p)p.classList.add("active");
+}
+</script>
 
 <!-- SPONSORS / PARTNERS -->
 <section class="sp-section" id="sponsors">
