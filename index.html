@@ -1586,13 +1586,9 @@ function sendContact(){
 
 
 function floatSwitch(qkey){
+  // Switch the quarter data in place — do NOT scroll. This lets the user
+  // compare the same section across quarters without losing their position.
   loadQ(qkey);
-  // Smooth-scroll to charts if user is above it, so they see the change
-  var charts=el("charts");
-  if(charts){
-    var top=charts.getBoundingClientRect().top;
-    if(top<-200||top>window.innerHeight){charts.scrollIntoView({behavior:"smooth",block:"start"});}
-  }
 }
 function updateFloatActive(){
   document.querySelectorAll(".qfb").forEach(function(b){
