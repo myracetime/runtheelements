@@ -1601,14 +1601,17 @@ function updateFloatActive(){
 }
 function updateFloatVisibility(){
   var bar=el("qfloat");if(!bar)return;
-  var charts=el("charts"),clubs=el("clubs");
+  var charts=el("charts");
   if(!charts)return;
-  // Show the floating bar while the analytics + leaderboard + clubs band is in view
-  var startEl=charts.getBoundingClientRect().top;
-  var endRef=clubs||el("leaderboard")||charts;
-  var endEl=endRef.getBoundingClientRect().bottom;
-  // Visible when the section band overlaps the viewport
-  var inBand=(startEl<window.innerHeight*0.6)&&(endEl>120);
+  // Show the floating bar from the Quarter Analytics section
+  // until just before the "Choose Your Tier" (tiers) section.
+  var startTop=charts.getBoundingClientRect().top;
+  var tiers=el("tiers");
+  var endTop=tiers?tiers.getBoundingClientRect().top:window.innerHeight*2;
+  // Visible once analytics scrolls near the top of the viewport,
+  // and hidden as soon as the tiers section starts entering from the bottom
+  // (so the bar never overlaps the "Choose Your Tier" cards).
+  var inBand=(startTop<window.innerHeight*0.6)&&(endTop>window.innerHeight-80);
   bar.classList.toggle("show",inBand);
 }
 
