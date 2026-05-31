@@ -7,6 +7,7 @@
 <link rel="icon" type="image/png" href="https://res.cloudinary.com/dbjahorp6/image/upload/v1779208351/COLOR_bmzexh.png">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"><</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><</script>
 <style>
 :root{
   --navy:#0d1f3c;--gold:#e8931a;--gold-l:rgba(232,147,26,.08);
@@ -605,6 +606,35 @@ body{background:#f0f4f8;min-height:100vh;padding-top:0}
       </div>
       <div id="flag-count" style="font-size:.82rem;color:var(--text3);font-weight:600;margin-bottom:.5rem"></div>
       <div style="overflow-x:auto"><table class="ft"><thead><tr><th>Name</th><th>Quarter</th><th>Computed Pace</th><th>Category</th><th>Distance</th><th>Time</th><th>Activities</th><th>Email</th><th></th></tr></thead><tbody id="flag-body"></tbody></table></div>
+    </div>
+
+    <div class="adm-sec">
+      <h4>Chart Export for Social Media</h4>
+      <p class="sub">Generate and download any chart as a high-resolution PNG, ready to share. Choose a quarter, pick your background, then download charts individually or all at once.</p>
+      <div style="display:flex;gap:.85rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem">
+        <select id="exp-q" class="uinp" style="width:auto;margin:0;cursor:pointer">
+          <option value="air_2026">Air Q1 2026</option>
+          <option value="water_2026">Water Q2 2026</option>
+          <option value="earth_2026">Earth Q3 2026</option>
+          <option value="fire_2026">Fire Q4 2026</option>
+          <option value="compare">Quarter Comparison (All)</option>
+        </select>
+        <label style="font-size:.82rem;color:var(--text2);display:flex;align-items:center;gap:.4rem;font-weight:600">
+          <input type="checkbox" id="exp-transparent" checked style="width:16px;height:16px;cursor:pointer"> Transparent background
+        </label>
+        <label style="font-size:.82rem;color:var(--text2);display:flex;align-items:center;gap:.4rem;font-weight:600">
+          Scale
+          <select id="exp-scale" class="uinp" style="width:auto;margin:0;cursor:pointer;padding:.3rem .5rem">
+            <option value="2">2x (standard)</option>
+            <option value="3">3x (high-res)</option>
+            <option value="4">4x (print)</option>
+          </select>
+        </label>
+        <button class="sbtn" onclick="renderExportCharts()">Generate Charts</button>
+        <button class="sbtn" onclick="downloadAllCharts()" style="background:var(--gold)">&#11123; Download All</button>
+      </div>
+      <div id="exp-status" style="font-size:.82rem;color:var(--text3);margin-bottom:1rem"></div>
+      <div id="exp-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.25rem"></div>
     </div>
 
     <div class="adm-sec">
@@ -1818,6 +1848,178 @@ function exportFlagCSV(){
   a.download="pace_anomalies_"+new Date().toISOString().slice(0,10)+".csv";a.click();URL.revokeObjectURL(a.href);
 }
 
+
+// ── CHART EXPORT FOR SOCIAL MEDIA ─────────────────────────────────────────────
+var EXP_CHARTS = {};   // chartId -> Chart instance
+var EXP_TITLES = {};   // chartId -> human title
+
+function expCleanup(){
+  Object.values(EXP_CHARTS).forEach(function(ch){try{ch.destroy();}catch(e){}});
+  EXP_CHARTS = {};
+  EXP_TITLES = {};
+  var wrap = el("exp-charts");
+  if(wrap) wrap.innerHTML = "";
+}
+
+function expCard(chartId, title){
+  EXP_TITLES[chartId] = title;
+  return '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:1rem;box-shadow:var(--shadow)">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.65rem;gap:.5rem">'+
+      '<span style="font-size:.82rem;font-weight:700;color:var(--navy)">'+title+'</span>'+
+      '<button class="sbtn" style="padding:.3rem .8rem;font-size:.73rem" onclick="downloadChart(\''+chartId+'\')">&#11123; PNG</button>'+
+    '</div>'+
+    '<div style="height:240px;position:relative"><canvas id="'+chartId+'"></canvas></div>'+
+  '</div>';
+}
+
+function downloadChart(chartId){
+  var ch = EXP_CHARTS[chartId];
+  if(!ch){alert("Chart not ready. Click Generate Charts first.");return;}
+  var transparent = (el("exp-transparent")||{checked:true}).checked;
+  var canvas = ch.canvas;
+  var out = document.createElement("canvas");
+  out.width = canvas.width;
+  out.height = canvas.height;
+  var ctx = out.getContext("2d");
+  if(!transparent){
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0,0,out.width,out.height);
+  }
+  ctx.drawImage(canvas,0,0);
+  var qk = (el("exp-q")||{value:"chart"}).value;
+  var fname = "RTE_"+qk+"_"+chartId.replace("exp-","")+(transparent?"_transparent":"")+".png";
+  out.toBlob(function(blob){
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = fname;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+}
+
+function downloadAllCharts(){
+  var ids = Object.keys(EXP_CHARTS);
+  if(!ids.length){alert("No charts generated yet. Click Generate Charts first.");return;}
+  var status = el("exp-status");
+  if(status)status.textContent = "Downloading "+ids.length+" charts...";
+  // Stagger downloads so the browser doesn't block them
+  ids.forEach(function(id, i){
+    setTimeout(function(){ downloadChart(id); }, i * 400);
+  });
+  setTimeout(function(){ if(status)status.textContent = "Downloaded "+ids.length+" charts."; }, ids.length*400+300);
+}
+
+function renderExportCharts(){
+  expCleanup();
+  var qk = (el("exp-q")||{value:"air_2026"}).value;
+  var scale = parseInt((el("exp-scale")||{value:"2"}).value)||2;
+  var wrap = el("exp-charts");
+  var status = el("exp-status");
+
+  // Comparison mode
+  if(qk === "compare"){
+    if(status)status.textContent = "Generating comparison charts...";
+    wrap.innerHTML = expCard("exp-cmp-part","Participants by Quarter") +
+                     expCard("exp-cmp-dist","Total Distance by Quarter") +
+                     expCard("exp-cmp-acts","Activities by Quarter");
+    var labels=[], partD=[], distD=[], actsD=[], colors=[];
+    ["air_2026","water_2026","earth_2026","fire_2026"].forEach(function(q){
+      var d=DB[q];if(!d||!d.length)return;
+      labels.push(QC[q].name);
+      partD.push(d.length);
+      distD.push(Math.round(d.reduce(function(s,x){return s+(x.d||0);},0)));
+      actsD.push(d.reduce(function(s,x){return s+(x.ac||0);},0));
+      colors.push(QC[q].color);
+    });
+    setTimeout(function(){
+      mkBar("exp-cmp-part", labels, partD, colors, scale);
+      mkBar("exp-cmp-dist", labels, distD, colors, scale);
+      mkBar("exp-cmp-acts", labels, actsD, colors, scale);
+      if(status)status.textContent = "3 comparison charts ready. Hit download on any, or Download All.";
+    }, 60);
+    return;
+  }
+
+  var data = DB[qk];
+  if(!data || !data.length){
+    wrap.innerHTML = '<p style="font-size:.85rem;color:var(--text3)">No data for this quarter yet. Upload a CSV first.</p>';
+    if(status)status.textContent = "";
+    return;
+  }
+  if(status)status.textContent = "Generating charts for "+QC[qk].label+"...";
+  var qc = QC[qk].color;
+
+  // Build cards
+  wrap.innerHTML =
+    expCard("exp-gender","Gender Split — "+QC[qk].label) +
+    expCard("exp-cat","Category Distribution — "+QC[qk].label) +
+    expCard("exp-age","Age Groups — "+QC[qk].label) +
+    expCard("exp-completion","Completion Tiers — "+QC[qk].label) +
+    expCard("exp-city","Top Cities — "+QC[qk].label) +
+    expCard("exp-pace","Pace Distribution — "+QC[qk].label) +
+    expCard("exp-clubs","Top 10 Clubs by Distance — "+QC[qk].label);
+
+  setTimeout(function(){
+    // Gender
+    var male=data.filter(function(d){return d.g==="Male";}).length;
+    var fem=data.filter(function(d){return d.g==="Female";}).length;
+    EXP_CHARTS["exp-gender"]=new Chart(el("exp-gender"),{type:"doughnut",data:{labels:["Male","Female"],datasets:[{data:[male,fem],backgroundColor:["#1565c0","#e91e8c"],borderWidth:0}]},options:expOpts(scale,{legend:true})});
+
+    // Category
+    var runCats=["75KM","125KM","250KM","375KM","500KM","750KM"];
+    var cats=qk==="water_2026"?runCats.concat(["800KM","1000KM","1500KM"]):runCats;
+    EXP_CHARTS["exp-cat"]=new Chart(el("exp-cat"),{type:"bar",data:{labels:cats,datasets:[{data:cats.map(function(ct){return data.filter(function(d){return d.c===ct;}).length;}),backgroundColor:qc,borderRadius:4}]},options:expOpts(scale,{})});
+
+    // Age
+    var abr=[{l:"18-24",mn:18,mx:24},{l:"25-29",mn:25,mx:29},{l:"30-34",mn:30,mx:34},{l:"35-39",mn:35,mx:39},{l:"40-49",mn:40,mx:49},{l:"50+",mn:50,mx:999}];
+    EXP_CHARTS["exp-age"]=new Chart(el("exp-age"),{type:"bar",data:{labels:abr.map(function(a){return a.l;}),datasets:[{data:abr.map(function(a){return data.filter(function(d){return d.a>=a.mn&&d.a<=a.mx;}).length;}),backgroundColor:"#e8931a",borderRadius:4}]},options:expOpts(scale,{})});
+
+    // Completion tiers
+    var CT={"75KM":75,"125KM":125,"250KM":250,"375KM":375,"500KM":500,"750KM":750,"800KM":800,"1000KM":1000,"1500KM":1500};
+    var t80=0,t50=0,tlow=0;
+    data.forEach(function(d){var tgt=CT[d.c]||75;if(d.d<=0)return;var pct=d.d/tgt*100;if(pct>=80)t80++;else if(pct>=50)t50++;else tlow++;});
+    EXP_CHARTS["exp-completion"]=new Chart(el("exp-completion"),{type:"doughnut",data:{labels:["80% & above","50% - 80%","Below 50%"],datasets:[{data:[t80,t50,tlow],backgroundColor:["#2e7d32","#e8931a","#dc2626"],borderWidth:0}]},options:expOpts(scale,{legend:true})});
+
+    // Top cities
+    var ci={};data.forEach(function(d){if(d.city){var k=d.city.trim().toUpperCase();ci[k]=(ci[k]||0)+1;}});
+    var tic=Object.entries(ci).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+    EXP_CHARTS["exp-city"]=new Chart(el("exp-city"),{type:"bar",data:{labels:tic.map(function(x){return cap(x[0]);}),datasets:[{data:tic.map(function(x){return x[1];}),backgroundColor:"#8b5cf6",borderRadius:4}]},options:expOpts(scale,{})});
+
+    // Pace distribution
+    var RW={"75KM":1,"125KM":1,"250KM":1,"375KM":1,"500KM":1,"750KM":1};
+    var bands=[{l:"<5",mn:0,mx:5},{l:"5-6",mn:5,mx:6},{l:"6-7",mn:6,mx:7},{l:"7-8",mn:7,mx:8},{l:"8-9",mn:8,mx:9},{l:"9-10",mn:9,mx:10},{l:"10+",mn:10,mx:999}];
+    var bandCounts=bands.map(function(b){return data.filter(function(d){if(!RW[d.c]||d.d<10||d.t<=0)return false;var p=d.t/d.d;return p>=3&&p>=b.mn&&p<b.mx;}).length;});
+    EXP_CHARTS["exp-pace"]=new Chart(el("exp-pace"),{type:"bar",data:{labels:bands.map(function(b){return b.l;}),datasets:[{data:bandCounts,backgroundColor:"#1565c0",borderRadius:4}]},options:expOpts(scale,{})});
+
+    // Top clubs by distance (10)
+    var od={};data.forEach(function(d){if(d.o)od[d.o]=(od[d.o]||0)+d.d;});
+    var td=Object.entries(od).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+    EXP_CHARTS["exp-clubs"]=new Chart(el("exp-clubs"),{type:"bar",data:{labels:td.map(function(x){return x[0];}),datasets:[{data:td.map(function(x){return Math.round(x[1]);}),backgroundColor:qc,borderRadius:4}]},options:Object.assign(expOpts(scale,{}),{indexAxis:"y"})});
+
+    if(status)status.textContent = "7 charts ready. Hit download on any, or Download All.";
+  }, 60);
+}
+
+function mkBar(id, labels, data, colors, scale){
+  EXP_CHARTS[id]=new Chart(el(id),{type:"bar",data:{labels:labels,datasets:[{data:data,backgroundColor:colors,borderRadius:4}]},options:expOpts(scale,{})});
+}
+
+function expOpts(scale, opts){
+  return {
+    responsive:true,
+    maintainAspectRatio:false,
+    devicePixelRatio:scale,
+    animation:false,
+    plugins:{
+      legend: opts.legend?{display:true,position:"bottom",labels:{color:"#1a2a40",font:{size:12,weight:"600"},padding:10}}:{display:false}
+    },
+    scales: opts.legend?{}:{
+      x:{ticks:{color:"#1a2a40",font:{size:11}},grid:{display:false}},
+      y:{ticks:{color:"#64748b",font:{size:11}},grid:{color:"rgba(0,0,0,0.06)"}}
+    }
+  };
+}
+
 function refreshAdminAnalytics(){
   buildCompletionTable();buildPaceTable();buildCityTable();buildFlagTable();
 }
@@ -1930,6 +2132,8 @@ document.addEventListener("DOMContentLoaded",function(){
   // Flag anomaly filters
   var fq=el("flag-q");if(fq)fq.addEventListener("change",buildFlagTable);
   var ft=el("flag-threshold");if(ft)ft.addEventListener("change",buildFlagTable);
+  // Chart export — regenerate when quarter changes
+  var eq=el("exp-q");if(eq)eq.addEventListener("change",function(){var s=el("exp-status");if(s)s.textContent="Quarter changed — click Generate Charts to refresh.";});
   // Expose for Firebase
   window.refreshAdminAnalytics=refreshAdminAnalytics;
 });
