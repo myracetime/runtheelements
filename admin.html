@@ -4,18 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Admin &mdash; Run The Elements 2026</title>
-<!-- PRIVACY: this dashboard exposes participant emails, phones & payments.
-     It must never be indexed or cached by search engines. -->
-<meta name="robots" content="noindex,nofollow,noarchive,noimageindex,nosnippet">
-<meta name="googlebot" content="noindex,nofollow,noarchive">
-<meta name="referrer" content="no-referrer">
-<meta name="theme-color" content="#0d1f3c">
 <link rel="icon" type="image/png" href="https://res.cloudinary.com/dbjahorp6/image/upload/v1779208351/COLOR_bmzexh.png">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
-<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"><</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><</script>
 <style>
 :root{
   --navy:#0d1f3c;--gold:#e8931a;--gold-l:rgba(232,147,26,.08);
@@ -463,6 +455,93 @@ body{background:#f0f4f8;min-height:100vh;padding-top:0}
 <div class="adm-main adm-content" id="adm-main">
   <div id="fb-status" class="fb-status"></div>
 
+  <!-- Grand Totals -->
+  <div style="background:var(--navy);border-radius:var(--r);padding:2rem;margin-bottom:1.5rem">
+    <div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.4rem">
+      <span style="font-size:1.4rem">&#128202;</span>
+      <h3 style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:#fff;letter-spacing:.03em;margin:0">Grand Totals &mdash; Everything at a Glance</h3>
+    </div>
+    <p style="font-size:.83rem;color:rgba(255,255,255,.5);margin:0 0 1.5rem;line-height:1.5">Live sums across every quarter currently loaded. Updates automatically whenever data is uploaded or synced from the cloud.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.75rem">
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.25rem 1.4rem">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:#fff;letter-spacing:.02em" id="ov-participants">--</div>
+      <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:.5rem">Total Participations</div>
+      <div style="font-size:.7rem;color:var(--gold);margin-top:.15rem">across all quarters</div>
+    </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.25rem 1.4rem">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:#fff;letter-spacing:.02em" id="ov-unique">--</div>
+      <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:.5rem">Unique People</div>
+      <div style="font-size:.7rem;color:var(--gold);margin-top:.15rem">de-duplicated</div>
+    </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.25rem 1.4rem">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:#fff;letter-spacing:.02em" id="ov-distance">--</div>
+      <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:.5rem">Total Distance</div>
+      
+    </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.25rem 1.4rem">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:#fff;letter-spacing:.02em" id="ov-hours">--</div>
+      <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:.5rem">Total Time on Move</div>
+      
+    </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.25rem 1.4rem">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:#fff;letter-spacing:.02em" id="ov-activities">--</div>
+      <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:.5rem">Activities Logged</div>
+      
+    </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.25rem 1.4rem">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:#fff;letter-spacing:.02em" id="ov-clubs">--</div>
+      <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:.5rem">Clubs & Orgs</div>
+      
+    </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.25rem 1.4rem">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:#fff;letter-spacing:.02em" id="ov-cities">--</div>
+      <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:.5rem">Cities</div>
+      
+    </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.25rem 1.4rem">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:#fff;letter-spacing:.02em" id="ov-revenue">--</div>
+      <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:.5rem">Gross Revenue</div>
+      
+    </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.25rem 1.4rem">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:#fff;letter-spacing:.02em" id="ov-legend">--</div>
+      <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:.5rem">Legend Eligible</div>
+      <div style="font-size:.7rem;color:var(--gold);margin-top:.15rem">2+ quarters</div>
+    </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.25rem 1.4rem">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:#fff;letter-spacing:.02em" id="ov-elemental">--</div>
+      <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:.5rem">Elemental Legends</div>
+      <div style="font-size:.7rem;color:var(--gold);margin-top:.15rem">all 4 quarters</div>
+    </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.25rem 1.4rem">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:#fff;letter-spacing:.02em" id="ov-avgdist">--</div>
+      <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:.5rem">Avg Distance / Person</div>
+      
+    </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.25rem 1.4rem">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:#fff;letter-spacing:.02em" id="ov-completion">--</div>
+      <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:.5rem">Target Completion</div>
+      <div style="font-size:.7rem;color:var(--gold);margin-top:.15rem">met category goal</div>
+    </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:.85rem;color:#fff">
+        <thead>
+          <tr style="text-align:left">
+            <th style="padding:.6rem .75rem;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:700">Quarter</th>
+            <th style="padding:.6rem .75rem;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:700">Participants</th>
+            <th style="padding:.6rem .75rem;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:700">Distance (km)</th>
+            <th style="padding:.6rem .75rem;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:700">Hours</th>
+            <th style="padding:.6rem .75rem;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:700">Activities</th>
+            <th style="padding:.6rem .75rem;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:700">Avg Dist</th>
+            <th style="padding:.6rem .75rem;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:700">Revenue</th>
+          </tr>
+        </thead>
+        <tbody id="ov-quarter-body"></tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- Firebase Setup Guide -->
   <div id="fb-setup-guide" style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:var(--r);padding:1.5rem 1.75rem;margin-bottom:1.5rem">
     <div style="display:flex;align-items:flex-start;gap:.85rem">
@@ -483,28 +562,6 @@ body{background:#f0f4f8;min-height:100vh;padding-top:0}
     </div>
   </div>
   <div class="adm-box">
-
-    <!-- ════════ GRAND TOTALS — EVERYTHING AT A GLANCE ════════ -->
-    <div class="adm-sec" id="gt-sec" style="background:linear-gradient(160deg,#0d1f3c,#15294a);border:none">
-      <h4 style="color:#fff">&#128202; Grand Totals &mdash; Everything at a Glance</h4>
-      <p class="sub" style="color:rgba(255,255,255,.7)">Live sums across every quarter currently loaded. Updates automatically whenever data is uploaded or synced from the cloud.</p>
-      <div id="gt-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.85rem;margin-top:1.1rem"></div>
-      <div style="overflow-x:auto;margin-top:1.5rem">
-        <table class="ft" id="gt-table" style="color:#fff">
-          <thead><tr style="border-bottom:1px solid rgba(255,255,255,.18)">
-            <th style="color:rgba(255,255,255,.85)">Quarter</th>
-            <th style="color:rgba(255,255,255,.85)">Participants</th>
-            <th style="color:rgba(255,255,255,.85)">Distance (km)</th>
-            <th style="color:rgba(255,255,255,.85)">Hours</th>
-            <th style="color:rgba(255,255,255,.85)">Activities</th>
-            <th style="color:rgba(255,255,255,.85)">Avg Dist</th>
-            <th style="color:rgba(255,255,255,.85)">Revenue</th>
-          </tr></thead>
-          <tbody id="gt-body"></tbody>
-          <tfoot id="gt-foot" style="border-top:2px solid var(--gold)"></tfoot>
-        </table>
-      </div>
-    </div>
 
     <div class="adm-sec">
       <h4>Registration Link</h4>
@@ -566,6 +623,105 @@ body{background:#f0f4f8;min-height:100vh;padding-top:0}
       <div id="shirt-summary">
         <p style="font-size:.85rem;color:var(--text3)">Upload a CSV with a Shirt Size column to see the breakdown here.</p>
       </div>
+    </div>
+
+    <div class="adm-sec">
+      <h4>Completion Rate by Category</h4>
+      <p class="sub">For each category, how many participants reached <strong>80% &amp; above</strong>, <strong>50%&ndash;80%</strong>, or <strong>below 50%</strong> of their target distance. Only counts those with recorded distance.</p>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.85rem" id="comp-q-tabs">
+        <button class="la-tab active" data-cq="air_2026">Air Q1</button>
+        <button class="la-tab" data-cq="water_2026">Water Q2</button>
+        <button class="la-tab" data-cq="earth_2026">Earth Q3</button>
+        <button class="la-tab" data-cq="fire_2026">Fire Q4</button>
+      </div>
+      <div style="overflow-x:auto"><table class="ft"><thead><tr><th>Category</th><th>Total</th><th style="color:#2e7d32">80%+</th><th style="color:#e8931a">50&ndash;80%</th><th style="color:#dc2626">&lt;50%</th><th>Avg %</th></tr></thead><tbody id="comp-body"></tbody></table></div>
+    </div>
+
+    <div class="adm-sec">
+      <h4>Fastest Pace Leaderboard</h4>
+      <p class="sub">Top 25 fastest average pace (Run/Walk categories only &mdash; cycling 800KM+ excluded). Minimum 10km logged to qualify.</p>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:.85rem">
+        <select id="pace-q" class="uinp" style="width:auto;margin:0;cursor:pointer">
+          <option value="air_2026">Air Q1 2026</option>
+          <option value="water_2026">Water Q2 2026</option>
+          <option value="earth_2026">Earth Q3 2026</option>
+          <option value="fire_2026">Fire Q4 2026</option>
+        </select>
+        <select id="pace-g" class="uinp" style="width:auto;margin:0;cursor:pointer">
+          <option value="all">All Genders</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+        <button class="sbtn" onclick="exportPaceCSV()">&#11123; Export CSV</button>
+      </div>
+      <div style="overflow-x:auto"><table class="ft"><thead><tr><th>#</th><th>Name</th><th>Pace</th><th>Category</th><th>Distance</th><th>Club</th><th>City</th></tr></thead><tbody id="pace-body"></tbody></table></div>
+    </div>
+
+    <div class="adm-sec">
+      <h4>City Breakdown</h4>
+      <p class="sub">Participants, total distance, and average pace per city. Sortable, exportable.</p>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:.85rem">
+        <select id="city-q" class="uinp" style="width:auto;margin:0;cursor:pointer">
+          <option value="all">All Quarters Combined</option>
+          <option value="air_2026">Air Q1 2026</option>
+          <option value="water_2026">Water Q2 2026</option>
+          <option value="earth_2026">Earth Q3 2026</option>
+          <option value="fire_2026">Fire Q4 2026</option>
+        </select>
+        <button class="sbtn" onclick="exportCityCSV()">&#11123; Export CSV</button>
+      </div>
+      <div style="overflow-x:auto"><table class="ft"><thead><tr><th>#</th><th>City</th><th>Participants</th><th>Total Distance</th><th>Avg Distance</th><th>Avg Pace (R/W)</th></tr></thead><tbody id="city-body"></tbody></table></div>
+    </div>
+
+    <div class="adm-sec">
+      <h4>Flagged Pace Anomalies</h4>
+      <p class="sub">Participants in <strong>Run/Walk</strong> categories whose computed pace is physically implausible for running &mdash; likely cyclists who picked the wrong category, or data-entry errors. These are <strong>excluded from the pace leaderboard</strong> but listed here so you can verify and take action.</p>
+      <div style="display:flex;gap:.85rem;flex-wrap:wrap;align-items:center;margin-bottom:.85rem">
+        <select id="flag-q" class="uinp" style="width:auto;margin:0;cursor:pointer">
+          <option value="all">All Quarters</option>
+          <option value="air_2026">Air Q1 2026</option>
+          <option value="water_2026">Water Q2 2026</option>
+          <option value="earth_2026">Earth Q3 2026</option>
+          <option value="fire_2026">Fire Q4 2026</option>
+        </select>
+        <label style="font-size:.78rem;color:var(--text3);display:flex;align-items:center;gap:.4rem">
+          Flag faster than
+          <input type="number" id="flag-threshold" value="3.0" step="0.1" min="0" style="width:60px;padding:.3rem .4rem;border:1.5px solid var(--border2);border-radius:5px;font-family:inherit;font-size:.8rem"> min/km
+        </label>
+        <button class="sbtn" onclick="buildFlagTable()">Apply</button>
+        <button class="sbtn" onclick="exportFlagCSV()" style="background:var(--bg3);color:var(--navy);border:1px solid var(--border2)">&#11123; Export CSV</button>
+      </div>
+      <div id="flag-count" style="font-size:.82rem;color:var(--text3);font-weight:600;margin-bottom:.5rem"></div>
+      <div style="overflow-x:auto"><table class="ft"><thead><tr><th>Name</th><th>Quarter</th><th>Computed Pace</th><th>Category</th><th>Distance</th><th>Time</th><th>Activities</th><th>Email</th><th></th></tr></thead><tbody id="flag-body"></tbody></table></div>
+    </div>
+
+    <div class="adm-sec">
+      <h4>Chart Export for Social Media</h4>
+      <p class="sub">Generate and download any chart as a high-resolution PNG, ready to share. Choose a quarter, pick your background, then download charts individually or all at once.</p>
+      <div style="display:flex;gap:.85rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem">
+        <select id="exp-q" class="uinp" style="width:auto;margin:0;cursor:pointer">
+          <option value="air_2026">Air Q1 2026</option>
+          <option value="water_2026">Water Q2 2026</option>
+          <option value="earth_2026">Earth Q3 2026</option>
+          <option value="fire_2026">Fire Q4 2026</option>
+          <option value="compare">Quarter Comparison (All)</option>
+        </select>
+        <label style="font-size:.82rem;color:var(--text2);display:flex;align-items:center;gap:.4rem;font-weight:600">
+          <input type="checkbox" id="exp-transparent" checked style="width:16px;height:16px;cursor:pointer"> Transparent background
+        </label>
+        <label style="font-size:.82rem;color:var(--text2);display:flex;align-items:center;gap:.4rem;font-weight:600">
+          Scale
+          <select id="exp-scale" class="uinp" style="width:auto;margin:0;cursor:pointer;padding:.3rem .5rem">
+            <option value="2">2x (standard)</option>
+            <option value="3">3x (high-res)</option>
+            <option value="4">4x (print)</option>
+          </select>
+        </label>
+        <button class="sbtn" onclick="renderExportCharts()">Generate Charts</button>
+        <button class="sbtn" onclick="downloadAllCharts()" style="background:var(--gold)">&#11123; Download All</button>
+      </div>
+      <div id="exp-status" style="font-size:.82rem;color:var(--text3);margin-bottom:1rem"></div>
+      <div id="exp-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.25rem"></div>
     </div>
 
     <div class="adm-sec">
@@ -734,8 +890,9 @@ async function loadAll() {
       if (window.updateStats)      window.updateStats();
       if (window.loadQ)            window.loadQ(window.activeQ || "air_2026");
       if (window.updateFinancials) window.updateFinancials();
-      if (window.updateGrandTotals) window.updateGrandTotals();
+    if (window.updateOverview) window.updateOverview();
     if (window.updateShirtSummary) window.updateShirtSummary();
+    if (window.refreshAdminAnalytics) window.refreshAdminAnalytics();
       if (window.buildLegendTable) window.buildLegendTable();
       if (window.buildDupeList)    window.buildDupeList();
       if (window.buildClubDupeList) window.buildClubDupeList();
@@ -1246,7 +1403,7 @@ function uploadCSV(e,qkey){
       PERSONS[em].quarters[qkey]={bib:p.bib,mrt:p.mrt,c:p.c,d:p.d,t:p.t,pace:p.pace,ac:p.ac,tier:p.tier,o:p.o,g:p.g,a:p.a,city:p.city,country:p.country,phone:p.phone,shirt:p.shirt,pay:p.pay};
     });
     loadQ(qkey);updateStats();
-    if(typeof updateFinancials==="function")updateFinancials();if(typeof updateGrandTotals==="function")updateGrandTotals();if(typeof updateShirtSummary==="function")updateShirtSummary();
+    if(typeof updateFinancials==="function")updateFinancials();if(typeof updateOverview==="function")updateOverview();if(typeof updateShirtSummary==="function")updateShirtSummary();if(typeof refreshAdminAnalytics==="function")refreshAdminAnalytics();
     if(typeof buildLegendTable==="function")buildLegendTable();
     if(typeof buildDupeList==="function")buildDupeList();
     if(window.fbSaveQuarterData){
@@ -1510,84 +1667,74 @@ function addMerge(){
 }
 
 
-// ════════ GRAND TOTALS — sum of ALL data across every quarter ════════
-function updateGrandTotals(){
-  if(!el("gt-cards"))return;
-  var TARGET={"75KM":75,"125KM":125,"250KM":250,"375KM":375,"500KM":500,"750KM":750,"800KM":800,"1000KM":1000,"1500KM":1500};
-  var grand={part:0,dist:0,time:0,acts:0,rev:0,done:0};
-  var orgs={},cities={},perQ=[];
 
-  Object.keys(DB).forEach(function(qkey){
-    var data=DB[qkey];
-    if(!data||!data.length)return;
-    var q={key:qkey,label:(QC[qkey]?QC[qkey].label:qkey),color:(QC[qkey]?QC[qkey].color:"#94a3b8"),part:data.length,dist:0,time:0,acts:0,rev:0};
-    data.forEach(function(d){
-      q.dist+=d.d||0; q.time+=d.t||0; q.acts+=d.ac||0;
-      var pay=typeof d.pay==="number"?d.pay:parseInt(String(d.pay||"0").replace(/,/g,""))||0;
-      q.rev+=pay;
-      if(d.o)orgs[normOrg(d.o)]=1;
-      if(d.city)cities[d.city.trim().toUpperCase()]=1;
-      if((d.d||0)>=(TARGET[d.c]||75))grand.done++;
+// ── DASHBOARD OVERVIEW STATS ──────────────────────────────────────────────────
+function updateOverview(){
+  var CT={"75KM":75,"125KM":125,"250KM":250,"375KM":375,"500KM":500,"750KM":750,"800KM":800,"1000KM":1000,"1500KM":1500};
+  var tp=0,td=0,tt=0,ta=0,gt=0,orgs={},cities={},metGoal=0,withDist=0;
+  var rows=[];
+  ["air_2026","water_2026","earth_2026","fire_2026"].forEach(function(qk){
+    var d=DB[qk];if(!d||!d.length)return;
+    var qp=d.length,qd=0,qtime=0,qa=0,qrev=0;
+    d.forEach(function(p){
+      qd+=p.d||0;qtime+=p.t||0;qa+=p.ac||0;
+      var pay=typeof p.pay==="number"?p.pay:parseInt(String(p.pay||"0").replace(/,/g,""))||0;
+      qrev+=pay;
+      if(p.o)orgs[p.o]=1;
+      if(p.city)cities[p.city.trim().toUpperCase()]=1;
+      if(p.d>0){withDist++;if(p.d>=(CT[p.c]||75))metGoal++;}
     });
-    grand.part+=q.part; grand.dist+=q.dist; grand.time+=q.time; grand.acts+=q.acts; grand.rev+=q.rev;
-    perQ.push(q);
+    tp+=qp;td+=qd;tt+=qtime;ta+=qa;gt+=qrev;
+    rows.push({qk:qk,label:(QC[qk]?QC[qk].label:qk),color:(QC[qk]?QC[qk].color:"#94a3b8"),p:qp,d:qd,t:qtime,a:qa,rev:qrev});
   });
+  var uniquePeople=Object.keys(PERSONS).length;
+  var leg=Object.values(PERSONS).filter(function(p){return Object.keys(p.quarters).length>=2;}).length;
+  var elemental=Object.values(PERSONS).filter(function(p){return Object.keys(p.quarters).length>=4;}).length;
+  var avgDist=tp?td/tp:0;
+  var completionPct=withDist?Math.round(metGoal/withDist*100):0;
 
-  // People-level metrics (de-duplicated across quarters)
-  var people=Object.values(PERSONS);
-  var unique=people.length;
-  var legendEligible=people.filter(function(p){return Object.keys(p.quarters).length>=2;}).length;
-  var fullLegends=people.filter(function(p){return ALL_QUARTERS.every(function(q){return !!p.quarters[q];});}).length;
-  var avgDist=grand.part?grand.dist/grand.part:0;
-  var completion=grand.part?Math.round(grand.done/grand.part*100):0;
+  function set(id,val){var e=el(id);if(e)e.textContent=val;}
+  set("ov-participants",tp.toLocaleString());
+  set("ov-unique",uniquePeople.toLocaleString());
+  set("ov-distance",Math.round(td).toLocaleString()+" KM");
+  set("ov-hours",Math.round(tt/60).toLocaleString()+" HRS");
+  set("ov-activities",ta.toLocaleString());
+  set("ov-clubs",Object.keys(orgs).length.toLocaleString());
+  set("ov-cities",Object.keys(cities).length.toLocaleString());
+  set("ov-revenue","\u20a6"+gt.toLocaleString());
+  set("ov-legend",leg.toLocaleString());
+  set("ov-elemental",elemental.toLocaleString());
+  set("ov-avgdist",avgDist.toFixed(1)+" KM");
+  set("ov-completion",completionPct+"%");
 
-  // ── Cards ──
-  function card(num,label,sub){
-    return"<div style=\"background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:1rem 1.1rem\">"
-      +"<div style=\"font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:#fff;line-height:1.05\">"+num+"</div>"
-      +"<div style=\"font-size:.68rem;color:rgba(255,255,255,.65);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-top:.3rem\">"+label+"</div>"
-      +(sub?"<div style=\"font-size:.66rem;color:var(--gold);margin-top:.15rem\">"+sub+"</div>":"")+"</div>";
-  }
-  el("gt-cards").innerHTML=[
-    card(grand.part.toLocaleString(),"Total Participations","across all quarters"),
-    card(unique.toLocaleString(),"Unique People","de-duplicated"),
-    card(Math.round(grand.dist).toLocaleString()+" km","Total Distance"),
-    card(Math.round(grand.time/60).toLocaleString()+" hrs","Total Time on Move"),
-    card(grand.acts.toLocaleString(),"Activities Logged"),
-    card(Object.keys(orgs).length.toLocaleString(),"Clubs & Orgs"),
-    card(Object.keys(cities).length.toLocaleString(),"Cities"),
-    card("\u20A6"+grand.rev.toLocaleString(),"Gross Revenue"),
-    card(legendEligible.toLocaleString(),"Legend Eligible","2+ quarters"),
-    card(fullLegends.toLocaleString(),"Elemental Legends","all 4 quarters"),
-    card(avgDist.toFixed(1)+" km","Avg Distance / Person"),
-    card(completion+"%","Target Completion","met category goal")
-  ].join("");
-
-  // ── Per-quarter breakdown + TOTAL row ──
-  if(el("gt-body")){
-    el("gt-body").innerHTML=perQ.map(function(q){
-      return"<tr style=\"border-bottom:1px solid rgba(255,255,255,.08)\">"
-        +"<td style=\"font-weight:700;color:"+q.color+"\">"+q.label+"</td>"
-        +"<td>"+q.part.toLocaleString()+"</td>"
-        +"<td>"+Math.round(q.dist).toLocaleString()+"</td>"
-        +"<td>"+Math.round(q.time/60).toLocaleString()+"</td>"
-        +"<td>"+q.acts.toLocaleString()+"</td>"
-        +"<td>"+(q.part?(q.dist/q.part).toFixed(1):"0")+" km</td>"
-        +"<td style=\"color:var(--gold);font-weight:700\">\u20A6"+q.rev.toLocaleString()+"</td></tr>";
-    }).join("")||"<tr><td colspan=\"7\" style=\"color:rgba(255,255,255,.6);padding:1rem\">No quarter data loaded yet.</td></tr>";
-  }
-  if(el("gt-foot")){
-    el("gt-foot").innerHTML=perQ.length?("<tr style=\"font-weight:800\">"
-      +"<td style=\"color:#fff\">TOTAL</td>"
-      +"<td style=\"color:#fff\">"+grand.part.toLocaleString()+"</td>"
-      +"<td style=\"color:#fff\">"+Math.round(grand.dist).toLocaleString()+"</td>"
-      +"<td style=\"color:#fff\">"+Math.round(grand.time/60).toLocaleString()+"</td>"
-      +"<td style=\"color:#fff\">"+grand.acts.toLocaleString()+"</td>"
-      +"<td style=\"color:#fff\">"+avgDist.toFixed(1)+" km</td>"
-      +"<td style=\"color:var(--gold)\">\u20A6"+grand.rev.toLocaleString()+"</td></tr>"):"";
+  // Per-quarter table
+  var tb=el("ov-quarter-body");
+  if(tb){
+    var html="";
+    rows.forEach(function(r){
+      html+="<tr style=\"border-top:1px solid rgba(255,255,255,.1)\">"+
+        "<td style=\"padding:.7rem .75rem;font-weight:700;color:"+r.color+"\">"+r.label+"</td>"+
+        "<td style=\"padding:.7rem .75rem\">"+r.p.toLocaleString()+"</td>"+
+        "<td style=\"padding:.7rem .75rem\">"+Math.round(r.d).toLocaleString()+"</td>"+
+        "<td style=\"padding:.7rem .75rem\">"+Math.round(r.t/60).toLocaleString()+"</td>"+
+        "<td style=\"padding:.7rem .75rem\">"+r.a.toLocaleString()+"</td>"+
+        "<td style=\"padding:.7rem .75rem\">"+(r.p?(r.d/r.p).toFixed(1):"0")+" km</td>"+
+        "<td style=\"padding:.7rem .75rem;color:var(--gold);font-weight:700\">\u20a6"+r.rev.toLocaleString()+"</td>"+
+      "</tr>";
+    });
+    // Total row
+    html+="<tr style=\"border-top:2px solid var(--gold)\">"+
+      "<td style=\"padding:.7rem .75rem;font-weight:700\">TOTAL</td>"+
+      "<td style=\"padding:.7rem .75rem;font-weight:700\">"+tp.toLocaleString()+"</td>"+
+      "<td style=\"padding:.7rem .75rem;font-weight:700\">"+Math.round(td).toLocaleString()+"</td>"+
+      "<td style=\"padding:.7rem .75rem;font-weight:700\">"+Math.round(tt/60).toLocaleString()+"</td>"+
+      "<td style=\"padding:.7rem .75rem;font-weight:700\">"+ta.toLocaleString()+"</td>"+
+      "<td style=\"padding:.7rem .75rem;font-weight:700\">"+avgDist.toFixed(1)+" km</td>"+
+      "<td style=\"padding:.7rem .75rem;color:var(--gold);font-weight:700\">\u20a6"+gt.toLocaleString()+"</td>"+
+    "</tr>";
+    tb.innerHTML=html;
   }
 }
-
 
 function updateFinancials(){
   var rows=[],gt=0,gc=0;
@@ -1686,6 +1833,354 @@ function updateShirtSummary(){
   }
 }
 
+
+// ── COMPLETION RATE BY CATEGORY ───────────────────────────────────────────────
+var COMP_TGT={"75KM":75,"125KM":125,"250KM":250,"375KM":375,"500KM":500,"750KM":750,"800KM":800,"1000KM":1000,"1500KM":1500};
+var compQ="air_2026";
+function buildCompletionTable(){
+  var tb=el("comp-body");if(!tb)return;
+  var data=DB[compQ]||[];
+  var cats=["75KM","125KM","250KM","375KM","500KM","750KM","800KM","1000KM","1500KM"];
+  var rows="";
+  cats.forEach(function(cat){
+    var inCat=data.filter(function(d){return d.c===cat&&d.d>0;});
+    if(!inCat.length)return;
+    var tgt=COMP_TGT[cat]||75;
+    var t80=0,t50=0,tlow=0,sumPct=0;
+    inCat.forEach(function(d){
+      var pct=d.d/tgt*100;sumPct+=pct;
+      if(pct>=80)t80++;else if(pct>=50)t50++;else tlow++;
+    });
+    var avg=Math.round(sumPct/inCat.length);
+    rows+="<tr><td style=\"font-weight:700\">"+cat+"</td><td>"+inCat.length+"</td>"+
+      "<td style=\"color:#2e7d32;font-weight:700\">"+t80+"</td>"+
+      "<td style=\"color:#e8931a;font-weight:700\">"+t50+"</td>"+
+      "<td style=\"color:#dc2626;font-weight:700\">"+tlow+"</td>"+
+      "<td>"+avg+"%</td></tr>";
+  });
+  tb.innerHTML=rows||"<tr><td colspan=\"6\" style=\"color:#94a3b8;padding:.75rem\">No data for this quarter yet.</td></tr>";
+}
+
+// ── FASTEST PACE LEADERBOARD (admin, top 25) ──────────────────────────────────
+var PACE_RW={"75KM":1,"125KM":1,"250KM":1,"375KM":1,"500KM":1,"750KM":1};
+function getPaceRows(){
+  var qk=(el("pace-q")||{value:"air_2026"}).value;
+  var g=(el("pace-g")||{value:"all"}).value;
+  var data=DB[qk]||[];
+  return data.filter(function(d){
+    return PACE_RW[d.c]&&d.d>=10&&d.t>0&&(d.t/d.d)>=3&&(g==="all"||d.g===g);
+  }).map(function(d){
+    return{n:d.n,paceVal:d.t/d.d,c:d.c,d:d.d,o:d.o,city:d.city,g:d.g};
+  }).sort(function(a,b){return a.paceVal-b.paceVal;}).slice(0,25);
+}
+function buildPaceTable(){
+  var tb=el("pace-body");if(!tb)return;
+  var rows=getPaceRows();
+  tb.innerHTML=rows.length?rows.map(function(p,i){
+    var mm=Math.floor(p.paceVal),ss=Math.round((p.paceVal-mm)*60);if(ss===60){mm++;ss=0;}
+    var pace=mm+":"+(ss<10?"0":"")+ss+" /km";
+    return"<tr><td style=\"color:#94a3b8;font-weight:600\">"+(i+1)+"</td><td style=\"font-weight:600\">"+cap(p.n)+"</td><td style=\"color:#1565c0;font-weight:700\">"+pace+"</td><td>"+p.c+"</td><td>"+p.d.toFixed(1)+" km</td><td>"+(p.o||"Individual")+"</td><td>"+(p.city?cap(p.city):"N/A")+"</td></tr>";
+  }).join(""):"<tr><td colspan=\"7\" style=\"color:#94a3b8;padding:.75rem\">No qualifying participants (need 10km+ in a run/walk category).</td></tr>";
+}
+function exportPaceCSV(){
+  var rows=getPaceRows();var qk=(el("pace-q")||{value:"air_2026"}).value;
+  function esc(v){return '"'+String(v||"").replace(/"/g,'""')+'"';}
+  var out=["Rank,Name,Pace (min/km),Category,Distance (km),Club,City,Gender"];
+  rows.forEach(function(p,i){
+    var mm=Math.floor(p.paceVal),ss=Math.round((p.paceVal-mm)*60);if(ss===60){mm++;ss=0;}
+    out.push([i+1,esc(cap(p.n)),mm+":"+(ss<10?"0":"")+ss,esc(p.c),p.d.toFixed(2),esc(p.o||"Individual"),esc(cap(p.city||"")),esc(p.g)].join(","));
+  });
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([out.join("\n")],{type:"text/csv"}));
+  a.download="fastest_pace_"+qk+"_"+new Date().toISOString().slice(0,10)+".csv";a.click();URL.revokeObjectURL(a.href);
+}
+
+// ── CITY BREAKDOWN ─────────────────────────────────────────────────────────────
+function getCityRows(){
+  var qk=(el("city-q")||{value:"all"}).value;
+  var pool=[];
+  if(qk==="all"){Object.values(DB).forEach(function(d){if(d)pool=pool.concat(d);});}
+  else{pool=DB[qk]||[];}
+  var cities={};
+  pool.forEach(function(d){
+    if(!d.city)return;var k=d.city.trim().toUpperCase();
+    if(!cities[k])cities[k]={name:k,n:0,dist:0,paceSum:0,paceN:0};
+    cities[k].n++;cities[k].dist+=(d.d||0);
+    if(PACE_RW[d.c]&&d.d>=10&&d.t>0&&(d.t/d.d)>=3){cities[k].paceSum+=d.t/d.d;cities[k].paceN++;}
+  });
+  return Object.values(cities).map(function(c){
+    return{name:c.name,n:c.n,dist:c.dist,avg:c.n?c.dist/c.n:0,pace:c.paceN?c.paceSum/c.paceN:0};
+  }).sort(function(a,b){return b.dist-a.dist;});
+}
+function buildCityTable(){
+  var tb=el("city-body");if(!tb)return;
+  var rows=getCityRows();
+  tb.innerHTML=rows.length?rows.map(function(c,i){
+    var pace="--";
+    if(c.pace>0){var mm=Math.floor(c.pace),ss=Math.round((c.pace-mm)*60);if(ss===60){mm++;ss=0;}pace=mm+":"+(ss<10?"0":"")+ss+" /km";}
+    return"<tr><td style=\"color:#94a3b8;font-weight:600\">"+(i+1)+"</td><td style=\"font-weight:600\">"+cap(c.name)+"</td><td>"+c.n+"</td><td style=\"color:#e8931a;font-weight:700\">"+Math.round(c.dist).toLocaleString()+" km</td><td>"+c.avg.toFixed(1)+" km</td><td>"+pace+"</td></tr>";
+  }).join(""):"<tr><td colspan=\"6\" style=\"color:#94a3b8;padding:.75rem\">No city data yet.</td></tr>";
+}
+function exportCityCSV(){
+  var rows=getCityRows();var qk=(el("city-q")||{value:"all"}).value;
+  function esc(v){return '"'+String(v||"").replace(/"/g,'""')+'"';}
+  var out=["Rank,City,Participants,Total Distance (km),Avg Distance (km),Avg Pace (min/km R/W)"];
+  rows.forEach(function(c,i){
+    var pace="";if(c.pace>0){var mm=Math.floor(c.pace),ss=Math.round((c.pace-mm)*60);if(ss===60){mm++;ss=0;}pace=mm+":"+(ss<10?"0":"")+ss;}
+    out.push([i+1,esc(cap(c.name)),c.n,c.dist.toFixed(2),c.avg.toFixed(2),pace].join(","));
+  });
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([out.join("\n")],{type:"text/csv"}));
+  a.download="city_breakdown_"+qk+"_"+new Date().toISOString().slice(0,10)+".csv";a.click();URL.revokeObjectURL(a.href);
+}
+
+
+// ── FLAGGED PACE ANOMALIES ────────────────────────────────────────────────────
+var FLAG_RW={"75KM":1,"125KM":1,"250KM":1,"375KM":1,"500KM":1,"750KM":1};
+function getFlagRows(){
+  var qk=(el("flag-q")||{value:"all"}).value;
+  var thr=parseFloat((el("flag-threshold")||{value:"3"}).value)||3;
+  var pool=[];
+  if(qk==="all"){
+    Object.keys(DB).forEach(function(q){if(DB[q])DB[q].forEach(function(d){pool.push({d:d,q:q});});});
+  } else {
+    (DB[qk]||[]).forEach(function(d){pool.push({d:d,q:qk});});
+  }
+  var flagged=[];
+  pool.forEach(function(item){
+    var d=item.d;
+    // Only run/walk categories, with real distance & time
+    if(!FLAG_RW[d.c]||d.d<=0||d.t<=0)return;
+    var paceVal=d.t/d.d; // min per km
+    if(paceVal<thr){
+      flagged.push({n:d.n,q:item.q,paceVal:paceVal,c:d.c,dist:d.d,t:d.t,ac:d.ac,email:d.email||"",g:d.g});
+    }
+  });
+  flagged.sort(function(a,b){return a.paceVal-b.paceVal;});
+  return flagged;
+}
+function fmtPaceVal(pv){var mm=Math.floor(pv),ss=Math.round((pv-mm)*60);if(ss===60){mm++;ss=0;}return mm+":"+(ss<10?"0":"")+ss+" /km";}
+function buildFlagTable(){
+  var tb=el("flag-body");if(!tb)return;
+  var rows=getFlagRows();
+  var cnt=el("flag-count");
+  var thr=parseFloat((el("flag-threshold")||{value:"3"}).value)||3;
+  if(cnt)cnt.textContent=rows.length+" anomal"+(rows.length!==1?"ies":"y")+" flagged (faster than "+thr.toFixed(1)+" min/km)";
+  tb.innerHTML=rows.length?rows.map(function(p){
+    var qc=QC[p.q]||{label:p.q,color:"#94a3b8"};
+    var emailKey=p.email||p.n;
+    return"<tr style=\"background:#fffbeb\">"+
+      "<td style=\"font-weight:600\">"+cap(p.n)+"</td>"+
+      "<td><span style=\"color:"+qc.color+";font-weight:700;font-size:.72rem\">"+qc.label+"</span></td>"+
+      "<td style=\"color:#dc2626;font-weight:700\">"+fmtPaceVal(p.paceVal)+"</td>"+
+      "<td>"+p.c+"</td>"+
+      "<td>"+p.dist.toFixed(1)+" km</td>"+
+      "<td>"+fmtH(p.t)+"</td>"+
+      "<td>"+(p.ac||0)+"</td>"+
+      "<td style=\"font-size:.72rem;color:#718096;word-break:break-all\">"+(p.email||"&mdash;")+"</td>"+
+      "<td><button style=\"background:#0d1f3c;color:#fff;border:none;padding:.25rem .6rem;border-radius:4px;font-size:.7rem;cursor:pointer\" data-e=\""+emailKey+"\" class=\"flag-view\">View</button></td>"+
+    "</tr>";
+  }).join(""):"<tr><td colspan=\"9\" style=\"color:#94a3b8;padding:.75rem\">No pace anomalies in this selection. &#10003;</td></tr>";
+  tb.querySelectorAll(".flag-view").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var em=btn.dataset.e;
+      // resolve alias if any
+      if(window.EMAIL_ALIASES&&window.EMAIL_ALIASES[em])em=window.EMAIL_ALIASES[em];
+      if(PERSONS[em])showAdmProfile(em);
+      else{
+        // try find by name match
+        var found=Object.values(PERSONS).filter(function(p){return p.name.toUpperCase()===btn.dataset.e.toUpperCase();});
+        if(found.length)showAdmProfile(found[0].email);
+      }
+    });
+  });
+}
+function exportFlagCSV(){
+  var rows=getFlagRows();var thr=parseFloat((el("flag-threshold")||{value:"3"}).value)||3;
+  function esc(v){return '"'+String(v||"").replace(/"/g,'""')+'"';}
+  var out=["Name,Quarter,Computed Pace (min/km),Category,Distance (km),Time (hrs),Activities,Email,Gender"];
+  rows.forEach(function(p){
+    var qc=QC[p.q]||{label:p.q};
+    out.push([esc(cap(p.n)),esc(qc.label),fmtPaceVal(p.paceVal).replace(" /km",""),esc(p.c),p.dist.toFixed(2),(p.t/60).toFixed(2),(p.ac||0),esc(p.email),esc(p.g)].join(","));
+  });
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([out.join("\n")],{type:"text/csv"}));
+  a.download="pace_anomalies_"+new Date().toISOString().slice(0,10)+".csv";a.click();URL.revokeObjectURL(a.href);
+}
+
+
+// ── CHART EXPORT FOR SOCIAL MEDIA ─────────────────────────────────────────────
+var EXP_CHARTS = {};   // chartId -> Chart instance
+var EXP_TITLES = {};   // chartId -> human title
+
+function expCleanup(){
+  Object.values(EXP_CHARTS).forEach(function(ch){try{ch.destroy();}catch(e){}});
+  EXP_CHARTS = {};
+  EXP_TITLES = {};
+  var wrap = el("exp-charts");
+  if(wrap) wrap.innerHTML = "";
+}
+
+function expCard(chartId, title){
+  EXP_TITLES[chartId] = title;
+  return '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:1rem;box-shadow:var(--shadow)">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.65rem;gap:.5rem">'+
+      '<span style="font-size:.82rem;font-weight:700;color:var(--navy)">'+title+'</span>'+
+      '<button class="sbtn" style="padding:.3rem .8rem;font-size:.73rem" onclick="downloadChart(\''+chartId+'\')">&#11123; PNG</button>'+
+    '</div>'+
+    '<div style="height:240px;position:relative"><canvas id="'+chartId+'"></canvas></div>'+
+  '</div>';
+}
+
+function downloadChart(chartId){
+  var ch = EXP_CHARTS[chartId];
+  if(!ch){alert("Chart not ready. Click Generate Charts first.");return;}
+  var transparent = (el("exp-transparent")||{checked:true}).checked;
+  var canvas = ch.canvas;
+  var out = document.createElement("canvas");
+  out.width = canvas.width;
+  out.height = canvas.height;
+  var ctx = out.getContext("2d");
+  if(!transparent){
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0,0,out.width,out.height);
+  }
+  ctx.drawImage(canvas,0,0);
+  var qk = (el("exp-q")||{value:"chart"}).value;
+  var fname = "RTE_"+qk+"_"+chartId.replace("exp-","")+(transparent?"_transparent":"")+".png";
+  out.toBlob(function(blob){
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = fname;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+}
+
+function downloadAllCharts(){
+  var ids = Object.keys(EXP_CHARTS);
+  if(!ids.length){alert("No charts generated yet. Click Generate Charts first.");return;}
+  var status = el("exp-status");
+  if(status)status.textContent = "Downloading "+ids.length+" charts...";
+  // Stagger downloads so the browser doesn't block them
+  ids.forEach(function(id, i){
+    setTimeout(function(){ downloadChart(id); }, i * 400);
+  });
+  setTimeout(function(){ if(status)status.textContent = "Downloaded "+ids.length+" charts."; }, ids.length*400+300);
+}
+
+function renderExportCharts(){
+  expCleanup();
+  var qk = (el("exp-q")||{value:"air_2026"}).value;
+  var scale = parseInt((el("exp-scale")||{value:"2"}).value)||2;
+  var wrap = el("exp-charts");
+  var status = el("exp-status");
+
+  // Comparison mode
+  if(qk === "compare"){
+    if(status)status.textContent = "Generating comparison charts...";
+    wrap.innerHTML = expCard("exp-cmp-part","Participants by Quarter") +
+                     expCard("exp-cmp-dist","Total Distance by Quarter") +
+                     expCard("exp-cmp-acts","Activities by Quarter");
+    var labels=[], partD=[], distD=[], actsD=[], colors=[];
+    ["air_2026","water_2026","earth_2026","fire_2026"].forEach(function(q){
+      var d=DB[q];if(!d||!d.length)return;
+      labels.push(QC[q].name);
+      partD.push(d.length);
+      distD.push(Math.round(d.reduce(function(s,x){return s+(x.d||0);},0)));
+      actsD.push(d.reduce(function(s,x){return s+(x.ac||0);},0));
+      colors.push(QC[q].color);
+    });
+    setTimeout(function(){
+      mkBar("exp-cmp-part", labels, partD, colors, scale);
+      mkBar("exp-cmp-dist", labels, distD, colors, scale);
+      mkBar("exp-cmp-acts", labels, actsD, colors, scale);
+      if(status)status.textContent = "3 comparison charts ready. Hit download on any, or Download All.";
+    }, 60);
+    return;
+  }
+
+  var data = DB[qk];
+  if(!data || !data.length){
+    wrap.innerHTML = '<p style="font-size:.85rem;color:var(--text3)">No data for this quarter yet. Upload a CSV first.</p>';
+    if(status)status.textContent = "";
+    return;
+  }
+  if(status)status.textContent = "Generating charts for "+QC[qk].label+"...";
+  var qc = QC[qk].color;
+
+  // Build cards
+  wrap.innerHTML =
+    expCard("exp-gender","Gender Split — "+QC[qk].label) +
+    expCard("exp-cat","Category Distribution — "+QC[qk].label) +
+    expCard("exp-age","Age Groups — "+QC[qk].label) +
+    expCard("exp-completion","Completion Tiers — "+QC[qk].label) +
+    expCard("exp-city","Top Cities — "+QC[qk].label) +
+    expCard("exp-pace","Pace Distribution — "+QC[qk].label) +
+    expCard("exp-clubs","Top 10 Clubs by Distance — "+QC[qk].label);
+
+  setTimeout(function(){
+    // Gender
+    var male=data.filter(function(d){return d.g==="Male";}).length;
+    var fem=data.filter(function(d){return d.g==="Female";}).length;
+    EXP_CHARTS["exp-gender"]=new Chart(el("exp-gender"),{type:"doughnut",data:{labels:["Male","Female"],datasets:[{data:[male,fem],backgroundColor:["#1565c0","#e91e8c"],borderWidth:0}]},options:expOpts(scale,{legend:true})});
+
+    // Category
+    var runCats=["75KM","125KM","250KM","375KM","500KM","750KM"];
+    var cats=qk==="water_2026"?runCats.concat(["800KM","1000KM","1500KM"]):runCats;
+    EXP_CHARTS["exp-cat"]=new Chart(el("exp-cat"),{type:"bar",data:{labels:cats,datasets:[{data:cats.map(function(ct){return data.filter(function(d){return d.c===ct;}).length;}),backgroundColor:qc,borderRadius:4}]},options:expOpts(scale,{})});
+
+    // Age
+    var abr=[{l:"18-24",mn:18,mx:24},{l:"25-29",mn:25,mx:29},{l:"30-34",mn:30,mx:34},{l:"35-39",mn:35,mx:39},{l:"40-49",mn:40,mx:49},{l:"50+",mn:50,mx:999}];
+    EXP_CHARTS["exp-age"]=new Chart(el("exp-age"),{type:"bar",data:{labels:abr.map(function(a){return a.l;}),datasets:[{data:abr.map(function(a){return data.filter(function(d){return d.a>=a.mn&&d.a<=a.mx;}).length;}),backgroundColor:"#e8931a",borderRadius:4}]},options:expOpts(scale,{})});
+
+    // Completion tiers
+    var CT={"75KM":75,"125KM":125,"250KM":250,"375KM":375,"500KM":500,"750KM":750,"800KM":800,"1000KM":1000,"1500KM":1500};
+    var t80=0,t50=0,tlow=0;
+    data.forEach(function(d){var tgt=CT[d.c]||75;if(d.d<=0)return;var pct=d.d/tgt*100;if(pct>=80)t80++;else if(pct>=50)t50++;else tlow++;});
+    EXP_CHARTS["exp-completion"]=new Chart(el("exp-completion"),{type:"doughnut",data:{labels:["80% & above","50% - 80%","Below 50%"],datasets:[{data:[t80,t50,tlow],backgroundColor:["#2e7d32","#e8931a","#dc2626"],borderWidth:0}]},options:expOpts(scale,{legend:true})});
+
+    // Top cities
+    var ci={};data.forEach(function(d){if(d.city){var k=d.city.trim().toUpperCase();ci[k]=(ci[k]||0)+1;}});
+    var tic=Object.entries(ci).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+    EXP_CHARTS["exp-city"]=new Chart(el("exp-city"),{type:"bar",data:{labels:tic.map(function(x){return cap(x[0]);}),datasets:[{data:tic.map(function(x){return x[1];}),backgroundColor:"#8b5cf6",borderRadius:4}]},options:expOpts(scale,{})});
+
+    // Pace distribution
+    var RW={"75KM":1,"125KM":1,"250KM":1,"375KM":1,"500KM":1,"750KM":1};
+    var bands=[{l:"<5",mn:0,mx:5},{l:"5-6",mn:5,mx:6},{l:"6-7",mn:6,mx:7},{l:"7-8",mn:7,mx:8},{l:"8-9",mn:8,mx:9},{l:"9-10",mn:9,mx:10},{l:"10+",mn:10,mx:999}];
+    var bandCounts=bands.map(function(b){return data.filter(function(d){if(!RW[d.c]||d.d<10||d.t<=0)return false;var p=d.t/d.d;return p>=3&&p>=b.mn&&p<b.mx;}).length;});
+    EXP_CHARTS["exp-pace"]=new Chart(el("exp-pace"),{type:"bar",data:{labels:bands.map(function(b){return b.l;}),datasets:[{data:bandCounts,backgroundColor:"#1565c0",borderRadius:4}]},options:expOpts(scale,{})});
+
+    // Top clubs by distance (10)
+    var od={};data.forEach(function(d){if(d.o)od[d.o]=(od[d.o]||0)+d.d;});
+    var td=Object.entries(od).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+    EXP_CHARTS["exp-clubs"]=new Chart(el("exp-clubs"),{type:"bar",data:{labels:td.map(function(x){return x[0];}),datasets:[{data:td.map(function(x){return Math.round(x[1]);}),backgroundColor:qc,borderRadius:4}]},options:Object.assign(expOpts(scale,{}),{indexAxis:"y"})});
+
+    if(status)status.textContent = "7 charts ready. Hit download on any, or Download All.";
+  }, 60);
+}
+
+function mkBar(id, labels, data, colors, scale){
+  EXP_CHARTS[id]=new Chart(el(id),{type:"bar",data:{labels:labels,datasets:[{data:data,backgroundColor:colors,borderRadius:4}]},options:expOpts(scale,{})});
+}
+
+function expOpts(scale, opts){
+  return {
+    responsive:true,
+    maintainAspectRatio:false,
+    devicePixelRatio:scale,
+    animation:false,
+    plugins:{
+      legend: opts.legend?{display:true,position:"bottom",labels:{color:"#1a2a40",font:{size:12,weight:"600"},padding:10}}:{display:false}
+    },
+    scales: opts.legend?{}:{
+      x:{ticks:{color:"#1a2a40",font:{size:11}},grid:{display:false}},
+      y:{ticks:{color:"#64748b",font:{size:11}},grid:{color:"rgba(0,0,0,0.06)"}}
+    }
+  };
+}
+
+function refreshAdminAnalytics(){
+  buildCompletionTable();buildPaceTable();buildCityTable();buildFlagTable();
+}
+
 function saveRegUrl(){
   var u=(el("reg-url")||{value:""}).value.trim();
   if(!u){alert("Please enter a valid URL.");return;}
@@ -1716,8 +2211,15 @@ document.addEventListener("DOMContentLoaded",function(){
   document.querySelectorAll(".sort-btn").forEach(function(b){b.addEventListener("click",function(){sortKey=b.dataset.sort;document.querySelectorAll(".sort-btn").forEach(function(x){x.classList.remove("active");});b.classList.add("active");renderClubs();});});
   // Guide tabs
   document.querySelectorAll(".guide-tab").forEach(function(b){b.addEventListener("click",function(){switchGuide(b,b.dataset.gid);});});
-  // Legend filter tabs (admin)
-  document.querySelectorAll(".la-tab").forEach(function(b){b.addEventListener("click",function(){legendFilter=b.dataset.lt;document.querySelectorAll(".la-tab").forEach(function(x){x.classList.remove("active");});b.classList.add("active");buildLegendTable();});});
+  // Legend filter tabs handled in admin-specific block below
+  // Completion quarter tabs
+  document.querySelectorAll(".la-tab[data-cq]").forEach(function(b){b.addEventListener("click",function(){compQ=b.dataset.cq;document.querySelectorAll(".la-tab[data-cq]").forEach(function(x){x.classList.remove("active");});b.classList.add("active");buildCompletionTable();});});
+  // Pace leaderboard filters
+  var pq=el("pace-q"),pg=el("pace-g");if(pq)pq.addEventListener("change",buildPaceTable);if(pg)pg.addEventListener("change",buildPaceTable);
+  // City quarter filter
+  var cq=el("city-q");if(cq)cq.addEventListener("change",buildCityTable);
+  // Expose for Firebase
+  window.refreshAdminAnalytics=refreshAdminAnalytics;window.updateOverview=updateOverview;
   // Lookup input
   if(el("lookup-input"))el("lookup-input").addEventListener("input",function(){doLookup(this.value);});
   // Admin search
@@ -1759,7 +2261,7 @@ function adminLogin(){
     el("adm-gate").style.display="none";
     el("adm-main").style.display="block";
     el("adm-logout-btn").style.display="inline-block";
-    updateFinancials();if(typeof updateGrandTotals==="function")updateGrandTotals();if(typeof updateShirtSummary==="function")updateShirtSummary();buildLegendTable();buildDupeList();buildClubDupeList();
+    updateFinancials();updateOverview();if(typeof updateShirtSummary==="function")updateShirtSummary();if(typeof refreshAdminAnalytics==="function")refreshAdminAnalytics();buildLegendTable();buildDupeList();buildClubDupeList();
     // Populate flyer textarea with any currently loaded URLs
     var ta=el("flyer-url-input");
     if(ta&&window.flyerURLs&&window.flyerURLs.length){ta.value=window.flyerURLs.join("\n");}
@@ -1777,7 +2279,20 @@ function adminLogout(){
 document.addEventListener("DOMContentLoaded",function(){
   var pw=el("adm-pw");if(pw)pw.addEventListener("keypress",function(e){if(e.key==="Enter")adminLogin();});
   var as=el("adm-search");if(as)as.addEventListener("input",function(){admSearch(this.value);});
-  document.querySelectorAll(".la-tab").forEach(function(b){b.addEventListener("click",function(){legendFilter=b.dataset.lt;document.querySelectorAll(".la-tab").forEach(function(x){x.classList.remove("active");});b.classList.add("active");buildLegendTable();});});
+  document.querySelectorAll(".la-tab[data-lt]").forEach(function(b){b.addEventListener("click",function(){legendFilter=b.dataset.lt;document.querySelectorAll(".la-tab[data-lt]").forEach(function(x){x.classList.remove("active");});b.classList.add("active");buildLegendTable();});});
+  // Completion quarter tabs
+  document.querySelectorAll(".la-tab[data-cq]").forEach(function(b){b.addEventListener("click",function(){compQ=b.dataset.cq;document.querySelectorAll(".la-tab[data-cq]").forEach(function(x){x.classList.remove("active");});b.classList.add("active");buildCompletionTable();});});
+  // Pace leaderboard filters
+  var pq=el("pace-q"),pg=el("pace-g");if(pq)pq.addEventListener("change",buildPaceTable);if(pg)pg.addEventListener("change",buildPaceTable);
+  // City quarter filter
+  var cq=el("city-q");if(cq)cq.addEventListener("change",buildCityTable);
+  // Flag anomaly filters
+  var fq=el("flag-q");if(fq)fq.addEventListener("change",buildFlagTable);
+  var ft=el("flag-threshold");if(ft)ft.addEventListener("change",buildFlagTable);
+  // Chart export — regenerate when quarter changes
+  var eq=el("exp-q");if(eq)eq.addEventListener("change",function(){var s=el("exp-status");if(s)s.textContent="Quarter changed — click Generate Charts to refresh.";});
+  // Expose for Firebase
+  window.refreshAdminAnalytics=refreshAdminAnalytics;window.updateOverview=updateOverview;
 });
 
 </script>
